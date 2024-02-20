@@ -22,3 +22,5 @@ add_executable(${PROJECT_NAME} main.cpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE
     embr::prometheus::core
     Catch2::Catch2WithMain)
+
+target_compile_definitions(${PROJECT_NAME} PRIVATE UNIT_TESTING=1)
