@@ -6,6 +6,8 @@ namespace embr {
 
 namespace prometheus {
 
+void synthetic();
+
 }
 
 }

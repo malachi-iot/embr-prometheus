@@ -7,7 +7,8 @@ idf_component_register(SRCS "main.cpp" ${UNITY_SOURCES}
     # Fails to resolve, despite FetchContent'ing in
     #REQUIRES embr estd
     PRIV_REQUIRES unity embr-prometheus
-#    WHOLE_ARCHIVE
+    # NOTE: This line is needed for Unity to auto-scoop the tests
+    WHOLE_ARCHIVE
     )
 
 # DEBT: See PGESP-40
