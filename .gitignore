@@ -3,3 +3,7 @@ build/
 
 # CLion
 cmake-build-*/
+
+# Qt Creator
+build-*/
+CMakeLists.txt.user

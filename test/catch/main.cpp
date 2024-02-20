@@ -10,7 +10,7 @@ TEST_CASE("TEST")
     estd::layer1::ostringstream<512> out;
     const auto& str = out.rdbuf()->str();
     Gauge<int> g;
-    Histogram<int, 0, 10, 20, 30> h;
+    Histogram<int, int, 0, 10, 20, 30> h;
     OutAssist<decltype(out)> oa(out);
     int v1[4];
 

@@ -17,7 +17,7 @@ struct metric_tag {};
 // buckets MUST appear in ascending order
 // TODO: Make specialized version without sum
 // DEBT: I think c++17 lets us do an auto variadic here - if so, consider doing it
-template <typename T, T... buckets>
+template <typename Counter, typename Bucket, Bucket... buckets>
 class Histogram : metric_tag
 {
 #if UNIT_TESTING
@@ -26,13 +26,13 @@ public:
     // TODO: Do one extra for +Inf
     static constexpr unsigned bucket_count = sizeof...(buckets);
 
-    T buckets_[bucket_count] {};
-    T sum_ {};
+    Counter buckets_[bucket_count] {};
+    Counter sum_ {};
 
 public:
-    void get(T out[bucket_count]) const
+    void get(Counter out[bucket_count]) const
     {
-        T prev {};
+        Counter prev {};
 
         for(int i = 0; i < bucket_count; i++)
         {
@@ -46,7 +46,7 @@ public:
         ++buckets_[bucket_idx];
     }
 
-    bool observe(const T& value)
+    bool observe(const Bucket& value)
     {
         // Lots of help from
         // https://www.foonathan.net/2020/05/fold-tricks/
@@ -197,8 +197,8 @@ public:
         out_ << ' ' << value.value();
     }
 
-    template <class T, T... buckets>
-    void metric(const Histogram<T, buckets...>& value, unsigned idx,
+    template <class Counter, class T, T... buckets>
+    void metric(const Histogram<Counter, T, buckets...>& value, unsigned idx,
         const char* n,
         T bucket,   // DEBT: Do this compile time
         const Labels& labels, int label_count)
@@ -266,8 +266,8 @@ public:
         oa_.out_ << estd::endl;
     }
 
-    template <class T, T... buckets>
-    void metric(const Histogram<T, buckets...>& value)
+    template <class T, typename Bucket, Bucket... buckets>
+    void metric(const Histogram<T, Bucket, buckets...>& value)
     {
         int i = 0;
         T calced[sizeof...(buckets)];
