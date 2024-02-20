@@ -36,8 +36,14 @@ public:
         // Lots of help from
         // https://www.foonathan.net/2020/05/fold-tricks/
 
+        // TODO: We need the 'inf' one also
+        // "The +Inf bucket must always be present"
+
         unsigned i = 0;
         unsigned bucket;
+        // FIX: Not quite right.  Buckets are less than our equal to which means
+        // potentially every bucket gets touched - although we could simulate that
+        // only on request instead of accumulating each one (do diffs)
         bool valid = (((i++ < bucket_count && value < buckets) && (bucket = i, true)) || ...);
 
         if(valid)   observe_idx(bucket - 1);
@@ -82,6 +88,7 @@ class Summary : metric_tag
 // Guidance from
 // https://sysdig.com/blog/prometheus-metrics/
 // https://prometheus.io/docs/instrumenting/writing_exporters/
+// https://www.robustperception.io/how-does-a-prometheus-histogram-work/
 
 // Gonna need to be smarter and more complex due to the way buckets work
 // (i.e. every bucket entry probably wants custom labels too)
@@ -109,6 +116,14 @@ public:
     Stream& out_;
     int labels_ = 0;
 
+    void prep_label()
+    {
+        if(labels_ == 0)
+            out_ << '{';
+        else
+            out_ << ", ";
+    }
+
     void finalize_label()
     {
         if(labels_ > 0) out_ << '}';
@@ -125,12 +140,10 @@ public:
         if(suffix)  out_ << suffix;
     }
 
-    void label(const char* label, const char* value)
+    template <class T>
+    void label(const char* label, const T& value)
     {
-        if(labels_ == 0)
-            out_ << '{';
-        else
-            out_ << ", ";
+        prep_label();
 
         out_ << label << "=\"";
         out_ << value;
@@ -142,6 +155,15 @@ public:
     void label(const Labels& labels, int label_count)
     {
         for(int i = 0; i < label_count; ++i)
+            label(labels.names[i], labels.values[i]);
+    }
+
+    template <class ...Args>
+    void label(const Labels2<Args...>& labels)
+    {
+        // FIX: gonna need estd::get<> on the tuple, which isn't
+        // going to work here unless there's a constexpr for waiting for us
+        for(int i = 0; i < sizeof...(Args); ++i)
             label(labels.names[i], labels.values[i]);
     }
 
@@ -159,12 +181,8 @@ public:
         T bucket,   // DEBT: Do this compile time
         const Labels& labels, int label_count)
     {
-        estd::layer1::string<8> s;
-
-        estd::to_string(s, bucket);
-
         name(n, "_bucket");
-        label("le", s.c_str());
+        label("le", bucket);
         label(labels, label_count);
         finalize_label();
 
