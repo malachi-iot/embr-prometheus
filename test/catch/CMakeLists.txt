@@ -5,11 +5,7 @@ set(CMAKE_CXX_STANDARD 17)
 
 include(../../tools/cmake/setvars.cmake)
 
-add_subdirectory(${ROOT_DIR}/src/core)
-
-include(FetchContent)
-
-Set(FETCHCONTENT_QUIET FALSE)
+add_subdirectory(${ROOT_DIR}/src/core core)
 
 FetchContent_Declare(
     Catch2
