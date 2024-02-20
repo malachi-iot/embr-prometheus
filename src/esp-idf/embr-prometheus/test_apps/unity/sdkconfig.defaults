@@ -1,0 +1,4 @@
+# I still want a watchdog in case of catastrophic failure, but let it take a long time
+# since this is a user interactive test
+# DEBT: There's probably a way to set this JUST for the Unity input console
+CONFIG_ESP_TASK_WDT_TIMEOUT_S=60
