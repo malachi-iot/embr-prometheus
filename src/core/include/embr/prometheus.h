@@ -2,6 +2,10 @@
 
 #include <estd/string.h>
 
+#include <estd/ios.h>
+// DEBT: Do a fwd for this guy
+#include <estd/iomanip.h>
+
 namespace embr {
 
 namespace prometheus {
@@ -82,12 +86,28 @@ class Summary : metric_tag
 // Gonna need to be smarter and more complex due to the way buckets work
 // (i.e. every bucket entry probably wants custom labels too)
 
+struct Labels
+{
+    const char** names;
+    const char** values;
+};
+
+template <class ...Args>
+struct Labels2
+{
+    const char** names;
+    estd::tuple<Args...> values;
+};
+
+
 template <class Stream>
 class OutAssist
 {
+#if UNIT_TESTING
+public:
+#endif
     Stream& out_;
     int labels_ = 0;
-    const char* name_;
 
     void finalize_label()
     {
@@ -95,11 +115,14 @@ class OutAssist
     }
 
 public:
-    OutAssist(Stream& out, const char* metric_name) : out_{out},
-        name_{metric_name}
+    OutAssist(Stream& out) : out_{out}
     {
-        // FIX: Need to do this as base name and append bucket, count, sum, total, etc
-        out_ << metric_name;
+    }
+
+    void name(const char* name, const char* suffix = nullptr)
+    {
+        out_ << name;
+        if(suffix)  out_ << suffix;
     }
 
     void label(const char* label, const char* value)
@@ -116,6 +139,12 @@ public:
         ++labels_;
     }
 
+    void label(const Labels& labels, int label_count)
+    {
+        for(int i = 0; i < label_count; ++i)
+            label(labels.names[i], labels.values[i]);
+    }
+
     template <class T>
     void metric(const Gauge<T>& value)
     {
@@ -125,13 +154,73 @@ public:
     }
 
     template <class T, T... buckets>
-    void metric(const Histogram<T, buckets...>& value)
+    void metric(const Histogram<T, buckets...>& value, unsigned idx,
+        const char* n,
+        T bucket,   // DEBT: Do this compile time
+        const Labels& labels, int label_count)
     {
+        estd::layer1::string<8> s;
+
+        estd::to_string(s, bucket);
+
+        name(n, "_bucket");
+        label("le", s.c_str());
+        label(labels, label_count);
         finalize_label();
 
-        //out_ << ' ' << value.value();
+        out_ << ' ' << value.buckets_[idx];
+    }
+
+    void reset()
+    {
+        labels_ = 0;
     }
 };
+
+template <class Stream, unsigned label_count = 0>
+class OutAssist2
+{
+    OutAssist<Stream> oa_;
+    const char* name_;
+
+    Labels labels_;
+
+    template <class T, T... buckets>
+    void histogram_metric(const Histogram<T, buckets...>& value, unsigned idx, T bucket)
+    {
+        oa_.metric(value, idx, name_, bucket, labels_, label_count);
+        oa_.reset();
+
+        oa_.out_ << estd::endl;
+    }
+
+public:
+    OutAssist2(Stream& out, const char* name,
+        const char** label_names = nullptr,
+        const char** label_values = nullptr) :
+        oa_(out),
+        name_(name),
+        labels_{label_names, label_values}
+    {
+    }
+
+    template <class T>
+    void metric(const Gauge<T>& value)
+    {
+        oa_.metric(value);
+        oa_.label(labels_);
+        oa_.out_ << estd::endl;
+    }
+
+    template <class T, T... buckets>
+    constexpr void metric(const Histogram<T, buckets...>& value)
+    {
+        int i = 0;
+
+        (!(histogram_metric(value, i, buckets), i++ < sizeof...(buckets)) || ...);
+    }
+};
+
 
 
 }
