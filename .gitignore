@@ -1,0 +1,5 @@
+# esp-idf, manual build
+build/
+
+# CLion
+cmake-build-*/
