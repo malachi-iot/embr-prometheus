@@ -15,23 +15,38 @@ void synthetic();
 struct metric_tag {};
 
 // buckets MUST appear in ascending order
+// TODO: Make specialized version without sum
+// DEBT: I think c++17 lets us do an auto variadic here - if so, consider doing it
 template <typename T, T... buckets>
 class Histogram : metric_tag
 {
 #if UNIT_TESTING
 public:
 #endif
+    // TODO: Do one extra for +Inf
     static constexpr unsigned bucket_count = sizeof...(buckets);
 
     T buckets_[bucket_count] {};
+    T sum_ {};
 
 public:
+    void get(T out[bucket_count]) const
+    {
+        T prev {};
+
+        for(int i = 0; i < bucket_count; i++)
+        {
+            prev += buckets_[i];
+            out[i] = prev;
+        }
+    }
+
     void observe_idx(unsigned bucket_idx)
     {
         ++buckets_[bucket_idx];
     }
 
-    bool observe(T value)
+    bool observe(const T& value)
     {
         // Lots of help from
         // https://www.foonathan.net/2020/05/fold-tricks/
@@ -48,7 +63,14 @@ public:
 
         if(valid)   observe_idx(bucket - 1);
 
+        sum_ += value;
+
         return valid;
+    }
+
+    void reset()
+    {
+
     }
 };
 
@@ -189,6 +211,20 @@ public:
         out_ << ' ' << value.buckets_[idx];
     }
 
+    template <class T>
+    void metric_histogram(const T& value,
+        const char* n,
+        T bucket,   // DEBT: Do this compile time
+        const Labels& labels, int label_count)
+    {
+        name(n, "_bucket");
+        label("le", bucket);
+        label(labels, label_count);
+        finalize_label();
+
+        out_ << ' ' << value;
+    }
+
     void reset()
     {
         labels_ = 0;
@@ -203,10 +239,10 @@ class OutAssist2
 
     Labels labels_;
 
-    template <class T, T... buckets>
-    void histogram_metric(const Histogram<T, buckets...>& value, unsigned idx, T bucket)
+    template <class T>
+    void histogram_metric(T value, T bucket)
     {
-        oa_.metric(value, idx, name_, bucket, labels_, label_count);
+        oa_.metric_histogram(value, name_, bucket, labels_, label_count);
         oa_.reset();
 
         oa_.out_ << estd::endl;
@@ -231,11 +267,14 @@ public:
     }
 
     template <class T, T... buckets>
-    constexpr void metric(const Histogram<T, buckets...>& value)
+    void metric(const Histogram<T, buckets...>& value)
     {
         int i = 0;
+        T calced[sizeof...(buckets)];
 
-        (!(histogram_metric(value, i, buckets), i++ < sizeof...(buckets)) || ...);
+        value.get(calced);
+
+        (!(histogram_metric(calced[i], buckets), i++ < sizeof...(buckets)) || ...);
     }
 };
 

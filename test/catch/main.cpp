@@ -12,6 +12,7 @@ TEST_CASE("TEST")
     Gauge<int> g;
     Histogram<int, 0, 10, 20, 30> h;
     OutAssist<decltype(out)> oa(out);
+    int v1[4];
 
     oa.name("metric1");
 
@@ -24,6 +25,11 @@ TEST_CASE("TEST")
     REQUIRE(h.buckets_[3] == 2);
 
     REQUIRE(h.observe(35) == false);
+
+    h.get(v1);
+
+    REQUIRE(v1[2] == 1);
+    REQUIRE(v1[3] == 3);
 
     g.add(23);
 
