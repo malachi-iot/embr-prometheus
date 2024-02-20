@@ -4,6 +4,13 @@ list(TRANSFORM UNITY_SOURCES PREPEND ${UNITY_SOURCES_DIR}/)
 
 idf_component_register(SRCS "main.cpp" ${UNITY_SOURCES}
     INCLUDE_DIRS "."
+    # Fails to resolve, despite FetchContent'ing in
+    #REQUIRES embr estd
     PRIV_REQUIRES unity embr-prometheus
 #    WHOLE_ARCHIVE
     )
+
+# DEBT: See PGESP-40
+#add_subdirectory(${ROOT_DIR}/src/core core)
+
+#target_link_libraries(${COMPONENT_LIB} PUBLIC embr::prometheus::core)

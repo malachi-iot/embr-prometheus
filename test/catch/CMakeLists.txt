@@ -20,5 +20,5 @@ FetchContent_MakeAvailable(Catch2)
 add_executable(${PROJECT_NAME} main.cpp)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
-    embr::prometheus
+    embr::prometheus::core
     Catch2::Catch2WithMain)
