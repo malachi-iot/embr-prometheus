@@ -6,74 +6,13 @@
 // DEBT: Do a fwd for this guy
 #include <estd/iomanip.h>
 
+#include "internal/histogram.h"
+
 namespace embr {
 
 namespace prometheus {
 
 void synthetic();
-
-struct metric_tag {};
-
-// buckets MUST appear in ascending order
-// TODO: Make specialized version without sum
-// DEBT: I think c++17 lets us do an auto variadic here - if so, consider doing it
-template <typename Counter, typename Bucket, Bucket... buckets>
-class Histogram : metric_tag
-{
-#if UNIT_TESTING
-public:
-#endif
-    // TODO: Do one extra for +Inf
-    static constexpr unsigned bucket_count = sizeof...(buckets);
-
-    Counter buckets_[bucket_count] {};
-    Counter sum_ {};
-
-public:
-    void get(Counter out[bucket_count]) const
-    {
-        Counter prev {};
-
-        for(int i = 0; i < bucket_count; i++)
-        {
-            prev += buckets_[i];
-            out[i] = prev;
-        }
-    }
-
-    void observe_idx(unsigned bucket_idx)
-    {
-        ++buckets_[bucket_idx];
-    }
-
-    bool observe(const Bucket& value)
-    {
-        // Lots of help from
-        // https://www.foonathan.net/2020/05/fold-tricks/
-
-        // TODO: We need the 'inf' one also
-        // "The +Inf bucket must always be present"
-
-        unsigned i = 0;
-        unsigned bucket;
-        // FIX: Not quite right.  Buckets are less than our equal to which means
-        // potentially every bucket gets touched - although we could simulate that
-        // only on request instead of accumulating each one (do diffs)
-        bool valid = (((i++ < bucket_count && value < buckets) && (bucket = i, true)) || ...);
-
-        if(valid)   observe_idx(bucket - 1);
-
-        sum_ += value;
-
-        return valid;
-    }
-
-    void reset()
-    {
-
-    }
-};
-
 
 template <class T>
 class Counter : metric_tag
