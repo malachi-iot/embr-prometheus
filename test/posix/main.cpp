@@ -1,14 +1,60 @@
 #include <iostream>
 
+#include <estd/internal/streambuf.h>
+#include <estd/ostream.h>
+
 #if __WIN64__
 #include <winsock2.h>
 #else
 #include <inaddr.h>
-#include <sys/unistd.h>
+#include <sys/socket.h>
 #endif
+
+#include <sys/unistd.h>
 
 //#include <embr/prometheus.h>
 #include <embr/internal/histogram.h>
+
+// existing posix_streambuf uses FILE.  Ultimately we probably prefer raw int file descriptors
+
+namespace impl {
+
+template <class Traits>
+class posix2_streambuf : public estd::internal::impl::streambuf_base<Traits>
+{
+    using base_type = estd::internal::impl::streambuf_base<Traits>;
+    //using base_type::streamsize;
+    int fd_;
+
+public:
+    constexpr posix2_streambuf(int fd) : fd_{fd}  {}
+    using typename base_type::char_type;
+
+    estd::streamsize xsputn(const char_type* s, estd::streamsize count);
+    int sputc(char_type);
+};
+
+template <class Traits>
+estd::streamsize posix2_streambuf<Traits>::xsputn(const char_type* s, estd::streamsize count)
+{
+    int ret = write(fd_, s, count);
+
+    // DEBT: Hmm how do we register an error or blocking condition here...
+    return ret < 0 ? 0 : ret;
+}
+
+template <class Traits>
+int posix2_streambuf<Traits>::sputc(char_type c)
+{
+    if(write(fd_, &c, 1) == 1) return c;
+
+    return Traits::eof();
+}
+
+}
+
+using posix2_streambuf = estd::detail::streambuf<impl::posix2_streambuf<estd::char_traits<char> > >;
+using posix2_ostream = estd::detail::basic_ostream<posix2_streambuf>;
 
 using namespace std;
 
@@ -18,8 +64,9 @@ int main()
 {
     int server_fd;
     struct sockaddr_in server_addr;
+    posix2_ostream out(1);
 
-    cout << "Hello World!" << endl;
+    out << "Hello World! " << sizeof(out) << estd::endl;
 
     if((server_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
     {
