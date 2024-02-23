@@ -6,6 +6,7 @@
 // DEBT: Do a fwd for this guy
 #include <estd/iomanip.h>
 
+#include "internal/fwd.h"
 #include "internal/histogram.h"
 
 namespace embr {
