@@ -18,13 +18,15 @@ void synthetic();
 template <class T>
 class Counter : metric_tag
 {
-    T value_;
+    T value_ {};
 
 public:
     void inc()
     {
         ++value_;
     }
+
+    constexpr const T& value() const { return value_; }
 };
 
 
@@ -72,10 +74,11 @@ struct Labels2
 template <class Stream>
 class OutAssist
 {
-#if UNIT_TESTING
+#//if UNIT_TESTING
 public:
-#endif
+//#endif
     Stream& out_;
+    // # of labels written so far for this line
     int labels_ = 0;
 
     void prep_label()
@@ -131,6 +134,14 @@ public:
 
     template <class T>
     void metric(const Gauge<T>& value)
+    {
+        finalize_label();
+
+        out_ << ' ' << value.value();
+    }
+
+    template <class T>
+    void metric(const Counter<T>& value)
     {
         finalize_label();
 
@@ -198,11 +209,32 @@ public:
     {
     }
 
+    template <class Impl>
+    void help(const estd::detail::basic_string<Impl>& s)
+    {
+
+    }
+
     template <class T>
     void metric(const Gauge<T>& value)
     {
+        oa_.out_ << "# TYPE " << name_ << " gauge" << estd::endl;
+        oa_.name(name_);
         oa_.metric(value);
         oa_.label(labels_);
+        oa_.out_ << estd::endl;
+    }
+
+    template <class T>
+    void metric(const Counter<T>& value, const char* help = nullptr)
+    {
+        if(help)
+            oa_.out_ << "# HELP " << name_ << "_total " << help << estd::endl;
+
+        oa_.out_ << "# TYPE " << name_ << "_total counter" << estd::endl;
+        oa_.name(name_, "_total");
+        oa_.metric(value);
+        oa_.label(labels_, label_count);
         oa_.out_ << estd::endl;
     }
 
