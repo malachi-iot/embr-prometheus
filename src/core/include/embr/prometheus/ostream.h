@@ -10,6 +10,8 @@
 
 namespace embr { namespace prometheus {
 
+extern const char** label_names;
+
 // Guidance from
 // https://sysdig.com/blog/prometheus-metrics/
 // https://prometheus.io/docs/instrumenting/writing_exporters/
@@ -31,6 +33,16 @@ struct Labels2
 {
     const char** names;
     estd::tuple<Args...> values;
+
+    constexpr Labels2(const char** n, const estd::tuple<Args...>& v) :
+        names{n},
+        values{v}
+    {}
+
+    explicit constexpr Labels2(const char** n, Args... v) :
+        names{n},
+        values{v...}
+    {}
 };
 
 template <class Stream>
@@ -91,7 +103,10 @@ public:
         // FIX: gonna need estd::get<> on the tuple, which isn't
         // going to work here unless there's a constexpr for waiting for us
         for(int i = 0; i < sizeof...(Args); ++i)
+        {
+            // TODO: Detect and skip over monostates/nullptrs
             label(labels.names[i], labels.values[i]);
+        }
     }
 
     template <class T>
@@ -220,17 +235,27 @@ public:
 
 namespace internal {
 
-template <class Metric>
+template <class Metric, class ...Args>
 struct metric_put : estd::internal::ostream_functor_tag
 {
     const Metric& metric_;
     const char* name_;
     const char* help_ = nullptr;
+    Labels2<Args...> labels_;
 
     constexpr metric_put(const Metric& metric, const char* name, const char* help) :
         metric_{metric},
         name_{name},
-        help_{help}
+        help_{help},
+        labels_{label_names}
+    {}
+
+    constexpr metric_put(const Metric& metric, const char* name, const char* help,
+        const Labels2<Args...>& labels) :
+        metric_{metric},
+        name_{name},
+        help_{help},
+        labels_{label_names, labels}
     {}
 
     template <class Streambuf, class Base>
@@ -249,6 +274,23 @@ constexpr internal::metric_put<Metric>
     put_metric(const Metric& metric, const char* name, const char* help = nullptr)
 {
     return { metric, name, help };
+}
+
+template <class Metric, class ...LabelValues>
+constexpr internal::metric_put<Metric, LabelValues...>
+put_metric(const Metric& metric, const char* name, const char* help,
+    Labels2<LabelValues...>& labels)
+{
+    return { metric, name, help, labels };
+}
+
+template <class Metric, class ...LabelValues>
+constexpr internal::metric_put<Metric, LabelValues...>
+put_metric(const Metric& metric, const char* name, const char* help,
+    LabelValues... label_values)
+{
+    return { metric, name, help, Labels2<LabelValues...>(label_names,
+        estd::tuple<LabelValues...>(std::forward<LabelValues>(label_values)...)) };
 }
 
 

@@ -8,6 +8,8 @@ int old_main()
 
 namespace embr::prometheus {
 
+const char** label_names = nullptr;
+
 void synthetic()
 {
     std::cout << "Hello" << std::endl;
