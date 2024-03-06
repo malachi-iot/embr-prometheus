@@ -1,6 +1,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <embr/prometheus.h>
+#include <embr/cbor/cbor.h>
 #include <estd/sstream.h>
 
 using namespace embr;
