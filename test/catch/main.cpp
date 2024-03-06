@@ -50,6 +50,12 @@ TEST_CASE("TEST")
     oa2.metric(h);
 
     //REQUIRE(str == "metric2");
+
+    out.rdbuf()->clear();
+
+    out << put_metric(g, "metric3");
+
+    REQUIRE(str == "# TYPE metric3 gauge\nmetric3 23\n");
 }
 
 

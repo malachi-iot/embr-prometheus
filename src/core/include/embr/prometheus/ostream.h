@@ -178,12 +178,15 @@ public:
     }
 
     template <class T>
-    void metric(const Gauge<T>& value)
+    void metric(const Gauge<T>& value, const char* help = nullptr)
     {
+        if(help)
+            oa_.out_ << "# HELP " << name_ << help << estd::endl;
+
         oa_.out_ << "# TYPE " << name_ << " gauge" << estd::endl;
         oa_.name(name_);
         oa_.metric(value);
-        oa_.label(labels_);
+        oa_.label(labels_, label_count);
         oa_.out_ << estd::endl;
     }
 
@@ -201,7 +204,7 @@ public:
     }
 
     template <class T, typename Bucket, Bucket... buckets>
-    void metric(const Histogram<T, Bucket, buckets...>& value)
+    void metric(const Histogram<T, Bucket, buckets...>& value, const char* help = nullptr)
     {
         int i = 0;
         T calced[sizeof...(buckets)];
@@ -220,9 +223,33 @@ namespace internal {
 template <class Metric>
 struct metric_put : estd::internal::ostream_functor_tag
 {
+    const Metric& metric_;
+    const char* name_;
+    const char* help_ = nullptr;
 
+    constexpr metric_put(const Metric& metric, const char* name, const char* help) :
+        metric_{metric},
+        name_{name},
+        help_{help}
+    {}
+
+    template <class Streambuf, class Base>
+    void operator()(estd::detail::basic_ostream<Streambuf, Base>& out) const
+    {
+        OutAssist2 oa(out, name_);
+
+        oa.metric(metric_, help_);
+    }
 };
 
 }
+
+template <class Metric>
+constexpr internal::metric_put<Metric>
+    put_metric(const Metric& metric, const char* name, const char* help = nullptr)
+{
+    return { metric, name, help };
+}
+
 
 }}
