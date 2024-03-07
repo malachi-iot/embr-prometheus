@@ -5,9 +5,11 @@ namespace embr { namespace prometheus {
 template <class T>
 class Counter : metric_tag
 {
-    T value_{};
+    T value_;
 
 public:
+    constexpr Counter(T initial = {}) : value_{initial} {}
+
     void inc()
     {
         ++value_;

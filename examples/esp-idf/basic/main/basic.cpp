@@ -22,6 +22,8 @@ extern "C" void app_main(void)
     }
     ESP_ERROR_CHECK(ret);
 
+    // NOTE: Prometheus scrapes imply a fixed IP address.  You might consider
+    // a DHCP reservation for your ESP32.
     wifi_init_sta();
 
     MiniHttpServer server;
@@ -50,7 +52,9 @@ extern "C" void app_main(void)
         http_respond_ok(client_out);
 
         client_out << put_metric(request_count, "request_count");
+        client_out << put_metric_uptime();
 
+        //client_fd.shutdown();
         client_fd.close();
     }
 }

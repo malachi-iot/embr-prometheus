@@ -82,6 +82,11 @@ public:
     {
         return Socket(::accept(fd_, (struct sockaddr *) addr, len));
     }
+
+    int shutdown(int how = SHUT_RDWR)
+    {
+        return ::shutdown(fd_, how);
+    }
 };
 
 }}

@@ -6,11 +6,15 @@
 // DEBT: Do a fwd for this guy
 #include <estd/iomanip.h>
 
+#include "internal/metric_put.h"
+
+#if ESP_PLATFORM
+#include "platform/esp-idf/ostream.h"
+#endif
+
 #include "fwd.h"
 
 namespace embr { namespace prometheus {
-
-extern const char** label_names;
 
 // Guidance from
 // https://sysdig.com/blog/prometheus-metrics/
@@ -19,31 +23,6 @@ extern const char** label_names;
 
 // Gonna need to be smarter and more complex due to the way buckets work
 // (i.e. every bucket entry probably wants custom labels too)
-
-// DEBT: These labels helpers belong elsewhere
-
-struct Labels
-{
-    const char** names;
-    const char** values;
-};
-
-template <class ...Args>
-struct Labels2
-{
-    const char** names;
-    estd::tuple<Args...> values;
-
-    constexpr Labels2(const char** n, const estd::tuple<Args...>& v) :
-        names{n},
-        values{v}
-    {}
-
-    explicit constexpr Labels2(const char** n, Args... v) :
-        names{n},
-        values{v...}
-    {}
-};
 
 template <class Stream>
 class OutAssist
@@ -230,42 +209,16 @@ public:
     }
 };
 
-//template <class Streambuf, class Base>
-//estd::detail::basic_ostream<Streambuf, Base>& operator <<
-
 namespace internal {
 
 template <class Metric, class ...Args>
-struct metric_put : estd::internal::ostream_functor_tag
+template <class Streambuf, class Base>
+void metric_put_core<Metric, Args...>::operator()(estd::detail::basic_ostream<Streambuf, Base>& out) const
 {
-    const Metric& metric_;
-    const char* name_;
-    const char* help_ = nullptr;
-    Labels2<Args...> labels_;
+    OutAssist2 oa(out, name_);
 
-    constexpr metric_put(const Metric& metric, const char* name, const char* help) :
-        metric_{metric},
-        name_{name},
-        help_{help},
-        labels_{label_names}
-    {}
-
-    constexpr metric_put(const Metric& metric, const char* name, const char* help,
-        const Labels2<Args...>& labels) :
-        metric_{metric},
-        name_{name},
-        help_{help},
-        labels_{label_names, labels}
-    {}
-
-    template <class Streambuf, class Base>
-    void operator()(estd::detail::basic_ostream<Streambuf, Base>& out) const
-    {
-        OutAssist2 oa(out, name_);
-
-        oa.metric(metric_, help_);
-    }
-};
+    oa.metric(metric_, help_);
+}
 
 }
 
