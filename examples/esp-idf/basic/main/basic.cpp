@@ -1,22 +1,35 @@
-#include <stdio.h>
+#include "esp_log.h"
+#include "nvs_flash.h"
 
 #include <embr/prometheus.h>
 #include <embr/posix/streambuf.h>
 #include <embr/prometheus/internal/server.h>
 
+void wifi_init_sta();
+
 using namespace embr::prometheus;
 
 Counter<unsigned> request_count;
 
+static const char* TAG = "prometheus::app";
+
 extern "C" void app_main(void)
 {
+    esp_err_t ret = nvs_flash_init();
+    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+      ESP_ERROR_CHECK(nvs_flash_erase());
+      ret = nvs_flash_init();
+    }
+    ESP_ERROR_CHECK(ret);
+
+    wifi_init_sta();
+
     MiniHttpServer server;
 
-    // TODO: Still have to pull in esp_helper or something else to get WiFi & TCP online
-    // Until that point, we just abort
-    return;
+    ESP_LOGI(TAG, "Starting prometheus listener");
 
-    server.start(9100);
+    if(server.start(9100) != EXIT_SUCCESS)
+        ESP_LOGW(TAG, "Couldn't start listener");
 
     for(;;)
     {
@@ -27,6 +40,8 @@ extern "C" void app_main(void)
             perror("accept failed");
             continue;
         }
+
+        ESP_LOGD(TAG, "Connection received");
 
         request_count.inc();
 
