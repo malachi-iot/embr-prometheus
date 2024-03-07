@@ -44,12 +44,17 @@ extern "C" void app_main(void)
             continue;
         }
 
-        ESP_LOGD(TAG, "Connection received");
-
         ++request_count;
         arbitrary_gauge = -request_count.value();
 
         posix_ostream client_out(client_fd);
+
+        // We'll just treat any old request content as valid
+        //static char buf[4096];
+        //int sz = client_out.rdbuf()->sgetn(buf, sizeof(buf));
+        int sz = 0;
+
+        ESP_LOGD(TAG, "Connection received: (req sz=%d)", sz);
 
         http_respond_ok(client_out);
 
@@ -57,7 +62,9 @@ extern "C" void app_main(void)
         client_out << put_metric_uptime();
         client_out << put_metric_gauge(arbitrary_gauge, "arbitrary");
 
-        client_fd.shutdown();     // Doesn't seem to really change things
+        // NOTE: SHUT_RDWR seems to wait for input side of socket to empty.  Totally
+        // reasonable, but we don't want to pay attention.
+        client_fd.shutdown(SHUT_WR);
         client_fd.close();
     }
 }

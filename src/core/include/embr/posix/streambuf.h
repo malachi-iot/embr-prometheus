@@ -1,6 +1,7 @@
 #pragma once
 
 #include <estd/ostream.h>
+#include <estd/istream.h>
 
 // existing posix_streambuf uses FILE.  Ultimately we probably prefer raw int file descriptors
 // DEBT: All this really ought to reside in estd
@@ -26,6 +27,8 @@ public:
 
     estd::streamsize xsputn(const char_type* s, estd::streamsize count);
     int sputc(char_type);
+    estd::streamsize xsgetn(char_type* s, estd::streamsize count);
+    int sgetc();
 };
 
 }
@@ -34,6 +37,10 @@ template <class Traits>
 using posix_streambuf = estd::detail::streambuf<impl::posix_streambuf<Traits> >;
 
 using posix_ostream = estd::detail::basic_ostream<posix_streambuf<estd::char_traits<char> > >;
+using posix_istream = estd::detail::basic_istream<posix_streambuf<estd::char_traits<char> > >;
+// TODO: Looks like I haven't yet made an estd::detail::basic_iostream ... oops!
+// https://github.com/malachi-iot/estdlib/issues/31
+//using posix_iostream = estd::internal::basic_iostream<posix_streambuf<estd::char_traits<char> > >;
 
 void stoker();
 

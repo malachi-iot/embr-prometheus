@@ -14,6 +14,15 @@ void synthetic()
 
 namespace impl {
 
+
+template <class Traits>
+estd::streamsize posix_streambuf<Traits>::xsgetn(char_type* s, estd::streamsize count)
+{
+    int ret = read(fd_, s, count);
+    return ret < 0 ? 0 : ret;
+}
+
+
 template <class Traits>
 estd::streamsize posix_streambuf<Traits>::xsputn(const char_type* s, estd::streamsize count)
 {
@@ -39,8 +48,10 @@ void stoker()
     posix_streambuf<estd::char_traits<char> > s(0);
     posix_streambuf<std::char_traits<char> > s2(0);
     posix_ostream o1(0);
+    char buf[64];
 
     o1 << "hello" << '!';
+    o1.rdbuf()->sgetn(buf, 64);
 }
 
 }

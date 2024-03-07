@@ -95,7 +95,7 @@ public:
         return ::send(fd_, buffer, length, flags);
     }
 
-    int shutdown(int how = SHUT_RDWR)
+    int shutdown(int how)
     {
         return ::shutdown(fd_, how);
     }
