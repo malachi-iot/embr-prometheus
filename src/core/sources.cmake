@@ -1,1 +1,1 @@
-set(SOURCES main.cpp)
+set(SOURCES prometheus.cpp)

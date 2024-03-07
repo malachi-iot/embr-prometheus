@@ -21,14 +21,22 @@ FetchContent_MakeAvailable(embr)
 
 include(sources.cmake)
 
-add_library(${PROJECT_NAME} ${SOURCES})
+# DEBT: Making this INTERFACE as we work out linker issues (it didn't help, though)
+# Put it back to default linkage once xsputn/sputc is worked out
+
+set(LINKAGE_MODE PUBLIC)
+
+#add_library(${PROJECT_NAME} ${LINKAGE_MODE} ${SOURCES})
+add_library(${PROJECT_NAME})
+
+target_sources(${PROJECT_NAME} ${LINKAGE_MODE} ${SOURCES})
 
 #add_library(embr::prometheus ALIAS ${PROJECT_NAME})
 add_library(embr::prometheus::core ALIAS ${PROJECT_NAME})
 
-target_include_directories(${PROJECT_NAME} PUBLIC include)
+target_include_directories(${PROJECT_NAME} ${LINKAGE_MODE} include)
 
-target_link_libraries(${PROJECT_NAME} PUBLIC embr estd)
+target_link_libraries(${PROJECT_NAME} ${LINKAGE_MODE} embr estd)
 
 # Makes no difference for estd "that is not in any export set." error
 #target_link_libraries(${PROJECT_NAME} PUBLIC idf::newlib)
