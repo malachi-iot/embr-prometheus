@@ -5,9 +5,11 @@ namespace embr::prometheus {
 template <class T>
 class Gauge : metric_tag
 {
-    T value_ {};
+    T value_;
 
 public:
+    constexpr Gauge(const T& initial = {}) : value_{initial} {}
+
     void add(T value)
     {
         value_ += value;

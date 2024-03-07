@@ -10,6 +10,7 @@ void wifi_init_sta();
 using namespace embr::prometheus;
 
 Counter<unsigned> request_count;
+int arbitrary_gauge = 0;
 
 static const char* TAG = "prometheus::app";
 
@@ -46,6 +47,7 @@ extern "C" void app_main(void)
         ESP_LOGD(TAG, "Connection received");
 
         ++request_count;
+        arbitrary_gauge = -request_count.value();
 
         posix_ostream client_out(client_fd);
 
@@ -53,6 +55,7 @@ extern "C" void app_main(void)
 
         client_out << put_metric(request_count, "request_count");
         client_out << put_metric_uptime();
+        client_out << put_metric_gauge(arbitrary_gauge, "arbitrary");
 
         client_fd.shutdown();     // Doesn't seem to really change things
         client_fd.close();

@@ -229,6 +229,20 @@ constexpr internal::metric_put<Metric>
     return { metric, name, help };
 }
 
+template <class T>
+constexpr internal::metric_put_core<Counter<T> >
+    put_metric_counter(const T& count, const char* name, const char* help = nullptr)
+{
+    return { { count }, name, help };
+}
+
+template <class T>
+constexpr internal::metric_put_core<Gauge<T> >
+put_metric_gauge(const T& value, const char* name, const char* help = nullptr)
+{
+    return { { value }, name, help };
+}
+
 template <class Metric, class ...LabelValues>
 constexpr internal::metric_put<Metric, LabelValues...>
 put_metric(const Metric& metric, const char* name, const char* help,
