@@ -1,6 +1,7 @@
 # esp-idf, manual build
 build/
 managed_components/
+dependencies.lock
 
 # CLion
 cmake-build-*/
