@@ -4,7 +4,12 @@
 #include <winsock2.h>
 #else
 #include <sys/socket.h>
+// DEBT: Check for LwIP presence, not ESP_PLATFORM
+#if ESP_PLATFORM
+#include <netinet/in.h>
+#else
 #include <netinet/ip.h>
+#endif
 #endif
 
 #include <sys/unistd.h>

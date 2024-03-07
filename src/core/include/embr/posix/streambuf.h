@@ -3,6 +3,7 @@
 #include <estd/ostream.h>
 
 // existing posix_streambuf uses FILE.  Ultimately we probably prefer raw int file descriptors
+// DEBT: All this really ought to reside in estd
 
 namespace embr::prometheus {
 

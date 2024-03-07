@@ -1,0 +1,15 @@
+dependencies:
+  idf:
+    component_hash: null
+    source:
+      type: idf
+    version: 5.0.6
+  malachi-iot/estd:
+    component_hash: 617d6e9d7c5848c4154eb510c155d5a99b87dc212584373591e67d5974d27d8d
+    source:
+      service_url: https://api.components.espressif.com/
+      type: service
+    version: 0.7.0
+manifest_hash: 5f602646998798aebd62ac63af6e3bc86f836b0af709e8b0f4fae24ea7f7fe47
+target: esp32
+version: 1.0.0

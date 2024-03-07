@@ -6,5 +6,5 @@ list(TRANSFORM SOURCES PREPEND ${CORE}/)
 
 idf_component_register(SRCS "embr-prometheus.c" ${SOURCES}
     INCLUDE_DIRS "include" ${CORE}/include
-    REQUIRES estdlib embr
+    REQUIRES estd # embr
     )
