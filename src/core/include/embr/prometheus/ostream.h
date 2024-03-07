@@ -14,6 +14,9 @@
 
 #include "fwd.h"
 
+// DEBT: Pick better name, constexpr if we can
+#define HTTP_ENDL   "\r\n"
+
 namespace embr { namespace prometheus {
 
 // Guidance from
@@ -152,7 +155,7 @@ class OutAssist2
         oa_.metric_histogram(value, name_, bucket, labels_, label_count);
         oa_.reset();
 
-        oa_.out_ << estd::endl;
+        oa_.out_ << HTTP_ENDL;
     }
 
 public:
@@ -175,26 +178,26 @@ public:
     void metric(const Gauge<T>& value, const char* help = nullptr)
     {
         if(help)
-            oa_.out_ << "# HELP " << name_ << help << estd::endl;
+            oa_.out_ << "# HELP " << name_ << help << HTTP_ENDL;
 
-        oa_.out_ << "# TYPE " << name_ << " gauge" << estd::endl;
+        oa_.out_ << "# TYPE " << name_ << " gauge" << HTTP_ENDL;
         oa_.name(name_);
         oa_.metric(value);
         oa_.label(labels_, label_count);
-        oa_.out_ << estd::endl;
+        oa_.out_ << HTTP_ENDL;
     }
 
     template <class T>
     void metric(const Counter<T>& value, const char* help = nullptr)
     {
         if(help)
-            oa_.out_ << "# HELP " << name_ << "_total " << help << estd::endl;
+            oa_.out_ << "# HELP " << name_ << "_total " << help << HTTP_ENDL;
 
-        oa_.out_ << "# TYPE " << name_ << "_total counter" << estd::endl;
+        oa_.out_ << "# TYPE " << name_ << "_total counter" << HTTP_ENDL;
         oa_.name(name_, "_total");
         oa_.metric(value);
         oa_.label(labels_, label_count);
-        oa_.out_ << estd::endl;
+        oa_.out_ << HTTP_ENDL;
     }
 
     template <class T, typename Bucket, Bucket... buckets>

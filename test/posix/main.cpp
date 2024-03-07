@@ -61,7 +61,6 @@ int main()
 
         http_respond_ok(client_out);
 
-        //client_out << "hi2u" << estd::endl;
         oa.metric(request_count);
         client_fd.close();
     }
