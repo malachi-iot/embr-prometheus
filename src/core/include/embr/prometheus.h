@@ -18,20 +18,6 @@ namespace prometheus {
 
 void synthetic();
 
-template <class T>
-class Gauge : metric_tag
-{
-    T value_ {};
-
-public:
-    void add(T value)
-    {
-        value_ += value;
-    }
-
-    constexpr const T& value() const { return value_; }
-};
-
 class Summary : metric_tag
 {
 

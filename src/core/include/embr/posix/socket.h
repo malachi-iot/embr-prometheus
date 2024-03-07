@@ -83,6 +83,13 @@ public:
         return Socket(::accept(fd_, (struct sockaddr *) addr, len));
     }
 
+    // UNTESTED
+    template <class T>
+    int opt(int level, int option_name, T* value)
+    {
+        return socketopt(fd_, level, option_name, value, sizeof(T));
+    }
+
     int shutdown(int how = SHUT_RDWR)
     {
         return ::shutdown(fd_, how);

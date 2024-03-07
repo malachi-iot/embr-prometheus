@@ -20,6 +20,12 @@ public:
             return EXIT_FAILURE;
         }
 
+        // Guidance from:
+        // https://stackoverflow.com/questions/10619952/how-to-completely-destroy-a-socket-connection-in-c
+        // We're trying to flush accepted socket contents.  This doesn't seem to help, though
+        int v = 1;
+        setsockopt(server_fd,SOL_SOCKET,SO_REUSEADDR,&v,sizeof(v));
+
         server_addr.sin_family = AF_INET;
     #if __WIN64__
         server_addr.sin_addr.S_un.S_addr = INADDR_ANY;

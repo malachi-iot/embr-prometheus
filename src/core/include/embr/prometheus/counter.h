@@ -16,6 +16,12 @@ public:
     }
 
     constexpr const T& value() const { return value_; }
+
+    Counter& operator++()
+    {
+        ++value_;
+        return *this;
+    }
 };
 
 }}

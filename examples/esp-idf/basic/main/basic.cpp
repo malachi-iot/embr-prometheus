@@ -45,7 +45,7 @@ extern "C" void app_main(void)
 
         ESP_LOGD(TAG, "Connection received");
 
-        request_count.inc();
+        ++request_count;
 
         posix_ostream client_out(client_fd);
 
@@ -54,7 +54,7 @@ extern "C" void app_main(void)
         client_out << put_metric(request_count, "request_count");
         client_out << put_metric_uptime();
 
-        //client_fd.shutdown();
+        client_fd.shutdown();     // Doesn't seem to really change things
         client_fd.close();
     }
 }
