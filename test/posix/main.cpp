@@ -8,13 +8,13 @@
 #include <embr/posix/socket.h>
 #include <embr/posix/streambuf.h>
 
-using posix2_ostream = embr::prometheus::posix_ostream;
+using posix_ostream = embr::prometheus::posix_ostream;
 
 using namespace std;
 
 // Guidance from https://dev.to/jeffreythecoder/how-i-built-a-simple-http-server-from-scratch-using-c-739
 
-void announce(posix2_ostream& out)
+void announce(posix_ostream& out)
 {
     //embr::prometheus::stoker();
 
@@ -25,52 +25,84 @@ void announce(posix2_ostream& out)
     out << "Starting prometheus synthetic server" << estd::endl;
 }
 
+
+class MiniHttpServer
+{
+    embr::posix::Socket ss;
+
+public:
+    int start(int port)
+    {
+        struct sockaddr_in server_addr;
+        int server_fd;
+
+        if((server_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+        {
+            // fails on windows, presumably a permission thing... except we aren't even listening yet
+            perror("socket failed");
+            return EXIT_FAILURE;
+        }
+
+        server_addr.sin_family = AF_INET;
+    #if __WIN64__
+        server_addr.sin_addr.S_un.S_addr = INADDR_ANY;
+    #else
+        server_addr.sin_addr.s_addr = INADDR_ANY;
+    #endif
+        server_addr.sin_port = htons(port);
+
+        if(ss.bind(&server_addr) < 0)
+        {
+            perror("bind failed");
+            return EXIT_FAILURE;
+        }
+
+        if(listen(server_fd, 3) < 0)
+        {
+            perror("listen failed");
+            return EXIT_FAILURE;
+        }
+
+        ss = server_fd;
+
+        return EXIT_SUCCESS;
+    }
+
+    embr::posix::Socket accept()
+    {
+        struct sockaddr_in client_addr;
+
+        socklen_t client_addr_size = sizeof(client_addr);
+
+        return ss.accept(&client_addr, &client_addr_size);
+    }
+};
+
+template <class Streambuf, class Base>
+void http_respond_ok(estd::detail::basic_ostream<Streambuf, Base>& out)
+{
+    out << "HTTP/1.1 200 OK" << estd::endl; // << estd::endl;
+    out << "Content-Type: text/html" << estd::endl << estd::endl;
+}
+
+
 int main()
 {
-    int server_fd;
-    struct sockaddr_in server_addr, client_addr;
-    posix2_ostream out(1);
+    posix_ostream out(1);
 
     announce(out);
 
-    if((server_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
-    {
-        // fails on windows, presumably a permission thing... except we aren't even listening yet
-        perror("socket failed");
-        return EXIT_FAILURE;
-    }
+    MiniHttpServer server;
 
-    embr::posix::Socket ss(server_fd);
-
-    server_addr.sin_family = AF_INET;
-#if __WIN64__
-    server_addr.sin_addr.S_un.S_addr = INADDR_ANY;
-#else
-    server_addr.sin_addr.s_addr = INADDR_ANY;
-#endif
-    server_addr.sin_port = htons(9100);
-
-    if(ss.bind(&server_addr) < 0)
-    {
-        perror("bind failed");
-        return EXIT_FAILURE;
-    }
-
-    if(listen(server_fd, 3) < 0)
-    {
-        perror("listen failed");
-        return EXIT_FAILURE;
-    }
+    server.start(9100);
 
     embr::prometheus::Counter<unsigned> request_count;
 
     for(;;)
     {
-        socklen_t client_addr_size = sizeof(client_addr);
-
         out << "Awaiting incoming client" << estd::endl;
 
-        embr::Socket client_fd = ss.accept(&client_addr, &client_addr_size);
+        embr::Socket client_fd = server.accept();
 
         if (!client_fd.valid())
         {
@@ -80,12 +112,11 @@ int main()
 
         request_count.inc();
 
-        posix2_ostream client_out(client_fd);
+        posix_ostream client_out(client_fd);
 
-        embr::prometheus::OutAssist2<posix2_ostream> oa(client_out, "request");
+        embr::prometheus::OutAssist2<posix_ostream> oa(client_out, "request");
 
-        client_out << "HTTP/1.1 200 OK" << estd::endl; // << estd::endl;
-        client_out << "Content-Type: text/html" << estd::endl << estd::endl;
+        http_respond_ok(client_out);
 
         //client_out << "hi2u" << estd::endl;
         oa.metric(request_count);

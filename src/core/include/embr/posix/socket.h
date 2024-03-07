@@ -17,6 +17,7 @@ class SocketBase
 protected:
     int fd_;
 
+    SocketBase() = default;
     constexpr SocketBase(int fd) : fd_{fd}  {}
 
 public:
@@ -30,6 +31,12 @@ public:
     }
 
     operator int() const { return fd_; }
+
+    SocketBase& operator=(int fd)
+    {
+        fd_ = fd;
+        return *this;
+    }
 };
 
 // A lot of existing wrappers out there, but they are too fancy.  Don't want pthreads or c++17
@@ -40,11 +47,18 @@ class Socket : public SocketBase
     using base_type = SocketBase;
 
 public:
+    // No full RAII here - learned my lesson with LwIP wrappers!  (use 'unique' helper)
+    Socket() = default;
     constexpr explicit Socket(int fd) : base_type(fd) {}
     Socket(int domain, int type, int protocol = 0) :
         base_type{socket(domain, type, protocol)}
     {
 
+    }
+    Socket& operator=(int fd)
+    {
+        base_type::operator =(fd);
+        return *this;
     }
 
     template <class Addr>
