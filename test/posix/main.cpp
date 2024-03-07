@@ -62,6 +62,7 @@ int main()
         http_respond_ok(client_out);
 
         oa.metric(request_count);
+        client_fd.shutdown();   // Doesn't help
         client_fd.close();
     }
 

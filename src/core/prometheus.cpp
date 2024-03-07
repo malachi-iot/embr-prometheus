@@ -17,6 +17,7 @@ namespace impl {
 template <class Traits>
 estd::streamsize posix_streambuf<Traits>::xsputn(const char_type* s, estd::streamsize count)
 {
+    //int ret = send(fd_, s, count, 0);
     int ret = write(fd_, s, count);
 
     // DEBT: Hmm how do we register an error or blocking condition here...

@@ -59,6 +59,11 @@ public:
 
         return ss.accept(&client_addr, &client_addr_size);
     }
+
+    void test1()
+    {
+        ss.close();
+    }
 };
 
 

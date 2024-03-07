@@ -90,6 +90,11 @@ public:
         return socketopt(fd_, level, option_name, value, sizeof(T));
     }
 
+    ssize_t send(const void* buffer, size_t length, int flags)
+    {
+        return ::send(fd_, buffer, length, flags);
+    }
+
     int shutdown(int how = SHUT_RDWR)
     {
         return ::shutdown(fd_, how);
