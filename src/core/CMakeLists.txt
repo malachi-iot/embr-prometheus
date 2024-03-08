@@ -36,6 +36,9 @@ add_library(embr::prometheus::core ALIAS ${PROJECT_NAME})
 
 target_include_directories(${PROJECT_NAME} ${LINKAGE_MODE} include)
 
+# TODO: Bring in versioning
+#include(${estd_SOURCE_DIR}/../tools/cmake/version.cmake)
+
 target_link_libraries(${PROJECT_NAME} ${LINKAGE_MODE} embr estd)
 
 # Makes no difference for estd "that is not in any export set." error
