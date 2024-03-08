@@ -28,10 +28,17 @@ include(sources.cmake)
 
 set(LINKAGE_MODE PUBLIC)
 
+list(TRANSFORM INCLUDES PREPEND include/embr/)
+list(TRANSFORM EXTRAS PREPEND ${ROOT_DIR}/)
+
 #add_library(${PROJECT_NAME} ${LINKAGE_MODE} ${SOURCES})
 add_library(${PROJECT_NAME})
 
-target_sources(${PROJECT_NAME} ${LINKAGE_MODE} ${SOURCES})
+target_sources(${PROJECT_NAME} ${LINKAGE_MODE}
+    ${SOURCES}
+    ${INCLUDES}
+    ${EXTRAS}
+)
 
 #add_library(embr::prometheus ALIAS ${PROJECT_NAME})
 add_library(embr::prometheus::core ALIAS ${PROJECT_NAME})

@@ -6,7 +6,7 @@ set(PROJECT_NAME_UPPER EMBR_PROMETHEUS)
 
 configure_file(
     ${estd_SOURCE_DIR}/../tools/cmake/in/version.in.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/prometheus/version.h)
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/embr/prometheus/version.h)
 
 configure_file(
     ${CMAKE_CURRENT_LIST_DIR}/in/idf_component.in.yml
