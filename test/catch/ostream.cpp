@@ -66,6 +66,6 @@ TEST_CASE("ostream")
         Labels2<int, const char*> labels(names, 0, "Hello");
         write(out, labels);
 
-        REQUIRE(str == "{val1=\"0\"val2=\"Hello\"}");
+        REQUIRE(str == "val1=\"0\", val2=\"Hello\"");
     }
 }

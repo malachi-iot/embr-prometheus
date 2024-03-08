@@ -59,13 +59,13 @@ void write_one_label(estd::detail::basic_ostream<Streambuf, Base>& out,
 
 }
 
+// NOTE: Someone else renders curly braces.  This way, we can add 'le' easily for buckets
 template <class Streambuf, class Base, typename ...LabelValues>
 void write(estd::detail::basic_ostream<Streambuf, Base>& out,
     // DEBT: Bug https://github.com/malachi-iot/estdlib/issues/32 keeps
     // us from const'ing this
     Labels2<LabelValues...>& labels)
 {
-    out << '{';
     // NOTE: Would prefer explicit c++20 generic syntax, but we want
     // to retain c++17 compatibility
     labels.values.visit([&](const auto& instance)
@@ -85,7 +85,6 @@ void write(estd::detail::basic_ostream<Streambuf, Base>& out,
     {
         write_one_label(out, )
     }); */
-    out << '}';
 }
 
 template <class Stream>
@@ -196,30 +195,67 @@ public:
         out_ << ' ' << value;
     }
 
+    template <class T, typename ...LabelValues>
+    void metric_histogram(const T& value,
+        const char* n,
+        T bucket,   // DEBT: Do this compile time
+        const Labels2<LabelValues...>& labels)
+    {
+        name(n, "_bucket");
+        label(labels);
+        label("le", bucket);
+        finalize_label();
+
+        out_ << ' ' << value;
+    }
+
     void reset()
     {
         labels_ = 0;
     }
 };
 
+#define UPGRADING_LABELS 0
+
+#if UPGRADING_LABELS
+template <class Stream, typename ...LabelValueTypes>
+#else
 template <class Stream, unsigned label_count = 0>
+#endif
 class OutAssist2
 {
     OutAssist<Stream> oa_;
     const char* name_;
 
+#if UPGRADING_LABELS
+    Labels2<LabelValueTypes...> labels_;
+#else
     Labels labels_;
+#endif
 
     template <class T>
     void histogram_metric(T value, T bucket)
     {
+#if UPGRADING_LABELS
+        oa_.metric_histogram(value, name_, bucket, labels_);
+#else
         oa_.metric_histogram(value, name_, bucket, labels_, label_count);
+#endif
         oa_.reset();
 
         oa_.out_ << HTTP_ENDL;
     }
 
 public:
+#if UPGRADING_LABELS
+    OutAssist2(Stream& out, const char* name,
+        const char** label_names, LabelValueTypes&&...values) :
+        oa_(out),
+        name_(name),
+        labels_(label_names, std::forward<LabelValueTypes>(values)...)
+    {
+    }
+#else
     OutAssist2(Stream& out, const char* name,
         const char** label_names = nullptr,
         const char** label_values = nullptr) :
@@ -228,6 +264,7 @@ public:
         labels_{label_names, label_values}
     {
     }
+#endif
 
     template <class Impl>
     void help(const estd::detail::basic_string<Impl>& s)
@@ -244,7 +281,11 @@ public:
         oa_.out_ << "# TYPE " << name_ << " gauge" << HTTP_ENDL;
         oa_.name(name_);
         oa_.metric(value);
+#if UPGRADING_LABELS
+        oa_.label(labels_);
+#else
         oa_.label(labels_, label_count);
+#endif
         oa_.out_ << HTTP_ENDL;
     }
 
