@@ -1,4 +1,5 @@
 get_filename_component(ROOT_DIR ${CMAKE_CURRENT_LIST_DIR}/../.. ABSOLUTE)
+set(TOOLS_DIR ${ROOT_DIR}/tools)
 
 include(FetchContent)
 

@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.19)
-project(embr-prometheus-core)
+project(embr-prometheus-core VERSION 0.1.0
+    DESCRIPTION "Embedded Prometheus provider"
+    HOMEPAGE_URL "https://github.com/malachi-iot/embr-prometheus")
 
 set(CMAKE_CXX_STANDARD 17)
 
@@ -36,8 +38,7 @@ add_library(embr::prometheus::core ALIAS ${PROJECT_NAME})
 
 target_include_directories(${PROJECT_NAME} ${LINKAGE_MODE} include)
 
-# TODO: Bring in versioning
-#include(${estd_SOURCE_DIR}/../tools/cmake/version.cmake)
+include(${TOOLS_DIR}/cmake/version.cmake)
 
 target_link_libraries(${PROJECT_NAME} ${LINKAGE_MODE} embr estd)
 

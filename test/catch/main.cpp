@@ -55,7 +55,7 @@ TEST_CASE("TEST")
 
     out << put_metric(g, "metric3");
 
-    REQUIRE(str == "# TYPE metric3 gauge\nmetric3 23\n");
+    REQUIRE(str == "# TYPE metric3 gauge\r\nmetric3 23\r\n");
 }
 
 
