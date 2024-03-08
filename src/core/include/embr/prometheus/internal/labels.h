@@ -1,5 +1,7 @@
 #pragma once
 
+#include <estd/tuple.h>
+
 // DEBT: These labels helpers need better names and obviously
 // a mismatch for 'internal' is going on here
 
@@ -20,15 +22,16 @@ struct Labels2
 {
     const char** names;
     estd::tuple<Args...> values;
+    //std::tuple<Args...> values;
 
     constexpr Labels2(const char** n, const estd::tuple<Args...>& v) :
         names{n},
         values{v}
     {}
 
-    explicit constexpr Labels2(const char** n, Args... v) :
+    explicit constexpr Labels2(const char** n, Args&&... v) :
         names{n},
-        values{v...}
+        values(std::forward<Args>(v)...)
     {}
 };
 

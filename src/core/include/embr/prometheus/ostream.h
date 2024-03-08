@@ -27,6 +27,67 @@ namespace embr { namespace prometheus {
 // Gonna need to be smarter and more complex due to the way buckets work
 // (i.e. every bucket entry probably wants custom labels too)
 
+namespace internal {
+
+// Technique lifted from
+// https://blog.tartanllama.xyz/exploding-tuples-fold-expressions/
+
+template <std::size_t... Idx>
+auto make_index_dispatcher(std::index_sequence<Idx...>) {
+    return [] (auto&& f) { (f(std::integral_constant<std::size_t,Idx>{}), ...); };
+}
+
+template <std::size_t N>
+auto make_index_dispatcher() {
+    return make_index_dispatcher(std::make_index_sequence<N>{});
+}
+
+template <typename Tuple, typename Func>
+void for_each(Tuple&& t, Func&& f) {
+    constexpr auto n = std::tuple_size<std::decay_t<Tuple>>::value;
+    auto dispatcher = make_index_dispatcher<n>();
+    dispatcher([&f,&t](auto idx) { f(std::get<idx>(std::forward<Tuple>(t))); });
+}
+
+template <class Streambuf, class Base, class T>
+void write_one_label(estd::detail::basic_ostream<Streambuf, Base>& out,
+    const char* name, const T& value)
+{
+    out << name << "=\"" << value << '"';
+}
+
+
+}
+
+template <class Streambuf, class Base, typename ...LabelValues>
+void write(estd::detail::basic_ostream<Streambuf, Base>& out,
+    // DEBT: Bug https://github.com/malachi-iot/estdlib/issues/32 keeps
+    // us from const'ing this
+    Labels2<LabelValues...>& labels)
+{
+    out << '{';
+    // NOTE: Would prefer explicit c++20 generic syntax, but we want
+    // to retain c++17 compatibility
+    labels.values.visit([&](const auto& instance)
+    {
+        if(instance.index > 0) out << ", ";
+
+        internal::write_one_label(out,
+            labels.names[instance.index],
+            instance.value);
+
+        return false;
+    });
+    // NOTE: Fold expressions are amazing, but my estd::tuple visitor is
+    // more convenient here
+    /*
+    internal::for_each(labels.values, [&](const auto& value)
+    {
+        write_one_label(out, )
+    }); */
+    out << '}';
+}
+
 template <class Stream>
 class OutAssist
 {
