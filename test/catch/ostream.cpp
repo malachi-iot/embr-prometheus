@@ -10,7 +10,8 @@ const char* r1 =
     R"(metric2_bucket{instance="abc", poop="def", le="0"} 0)" HTTP_ENDL
     R"(metric2_bucket{instance="abc", poop="def", le="10"} 0)" HTTP_ENDL
     R"(metric2_bucket{instance="abc", poop="def", le="20"} 1)" HTTP_ENDL
-    R"(metric2_bucket{instance="abc", poop="def", le="30"} 3)" HTTP_ENDL;
+    R"(metric2_bucket{instance="abc", poop="def", le="30"} 3)" HTTP_ENDL
+    R"(metric2_bucket{instance="abc", poop="def", le="+Inf"} 4)" HTTP_ENDL;
 
 TEST_CASE("ostream")
 {
@@ -23,7 +24,8 @@ TEST_CASE("ostream")
         Histogram<int, int, 0, 10, 20, 30> h;
         OutAssist<decltype(out)> oa(out);
 
-        int v1[4];
+        // +1 for +Inf
+        int v1[5];
 
         oa.name("metric1");
 
@@ -35,12 +37,15 @@ TEST_CASE("ostream")
         REQUIRE(h.buckets_[2] == 1);
         REQUIRE(h.buckets_[3] == 2);
 
-        REQUIRE(h.observe(35) == false);
+        bool b = h.observe(35);
+
+        REQUIRE(b == false);
 
         h.get(v1);
 
         REQUIRE(v1[2] == 1);
         REQUIRE(v1[3] == 3);
+        REQUIRE(v1[4] == 4);
 
         g.add(23);
 

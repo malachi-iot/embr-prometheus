@@ -14,8 +14,8 @@ class Histogram : metric_tag
 #if UNIT_TESTING
 public:
 #endif
-    // TODO: Do one extra for +Inf
-    static constexpr unsigned bucket_count = sizeof...(buckets);
+    // Do one extra for +Inf
+    static constexpr unsigned bucket_count = sizeof...(buckets) + 1;
 
     Counter buckets_[bucket_count] {};
     Counter sum_ {};
@@ -47,12 +47,16 @@ public:
 
         unsigned i = 0;
         unsigned bucket;
+        // DEBT: bucket_count -1 is a crude way of "catch all" for INF
         // FIX: Not quite right.  Buckets are less than our equal to which means
         // potentially every bucket gets touched - although we could simulate that
         // only on request instead of accumulating each one (do diffs)
-        bool valid = (((i++ < bucket_count && value < buckets) && (bucket = i, true)) || ...);
+        bool valid = (((i++ < (bucket_count - 1) && value < buckets) && (bucket = i, true)) || ...);
 
-        if(valid)   observe_idx(bucket - 1);
+        if(valid)
+            observe_idx(bucket - 1);
+        else
+            observe_idx(bucket_count - 1);
 
         sum_ += value;
 

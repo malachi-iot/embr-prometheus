@@ -210,10 +210,10 @@ public:
         out_ << ' ' << value;
     }
 
-    template <class T, typename ...LabelValues>
+    template <class T, class Bucket, typename ...LabelValues>
     void metric_histogram(const T& value,
         const char* n,
-        T bucket,   // DEBT: Do this compile time
+        Bucket bucket,   // DEBT: Do this compile time
         const Labels2<LabelValues...>& labels)
     {
         name(n, "_bucket");
@@ -247,8 +247,9 @@ class OutAssist2
     Labels labels_;
 #endif
 
-    template <class T>
-    void histogram_metric(T value, T bucket)
+    // Bucket has distinct type to flow through "+Int" string
+    template <class T, class Bucket = T>
+    void histogram_metric(T value, Bucket bucket)
     {
 #if UPGRADING_LABELS
         oa_.metric_histogram(value, name_, bucket, labels_);
@@ -332,12 +333,15 @@ public:
     void metric(const Histogram<T, Bucket, buckets...>& value, const char* help = nullptr)
     {
         int i = 0;
-        T calced[sizeof...(buckets)];
+        // DEBT: Easy to forget "+Inf" slot
+        T calced[sizeof...(buckets) + 1];
 
         value.get(calced);
 
         // DEBT: Let's resolve this constant warning
         (!(histogram_metric(calced[i], buckets), i++ < sizeof...(buckets)) || ...);
+
+        histogram_metric(calced[i], "+Inf");
     }
 };
 
