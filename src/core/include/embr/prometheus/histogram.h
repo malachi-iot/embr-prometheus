@@ -21,6 +21,8 @@ public:
     Counter sum_ {};
 
 public:
+    Counter sum() const { return sum_; }
+
     void get(Counter out[bucket_count]) const
     {
         Counter prev {};

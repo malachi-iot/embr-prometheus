@@ -15,9 +15,6 @@
 
 #include "fwd.h"
 
-// DEBT: Pick better name, constexpr if we can
-#define HTTP_ENDL   "\r\n"
-
 namespace embr { namespace prometheus {
 
 
@@ -97,8 +94,7 @@ public:
     template <class T>
     void metric(const Gauge<T>& value, const char* help = nullptr)
     {
-        if(help)
-            oa_.out_ << "# HELP " << name_ << ' ' << help << HTTP_ENDL;
+        if(help)    oa_.help(name_, help);
 
         oa_.out_ << "# TYPE " << name_ << " gauge" << HTTP_ENDL;
         oa_.name(name_);
@@ -110,13 +106,12 @@ public:
     template <class T>
     void metric(const Counter<T>& value, const char* help = nullptr)
     {
-        if(help)
-            oa_.out_ << "# HELP " << name_ << "_total " << help << HTTP_ENDL;
+        if(help)    oa_.help(name_, help, "_total");
 
         oa_.out_ << "# TYPE " << name_ << "_total counter" << HTTP_ENDL;
         oa_.name(name_, "_total");
-        oa_.metric(value);
         oa_.label(labels_);
+        oa_.metric(value);
         oa_.out_ << HTTP_ENDL;
     }
 
@@ -124,6 +119,9 @@ public:
     template <class T, typename Bucket, Bucket... buckets>
     void metric(const Histogram<T, Bucket, buckets...>& value, const char* help = nullptr)
     {
+        if(help)    oa_.help(name_, help);
+        oa_.out_ << "# TYPE " << name_ << " histogram" << HTTP_ENDL;
+
         int i = 0;
         // DEBT: Easy to forget "+Inf" slot
         T calced[sizeof...(buckets) + 1];
@@ -135,7 +133,18 @@ public:
 
         histogram_metric(calced[i], "+Inf");
 
-        //oa_.name(name_, "_sum");
+        oa_.name(name_, "_sum");
+        oa_.label(labels_);
+        oa_.metric(Gauge(value.sum()));
+        oa_.out_ << HTTP_ENDL;
+        oa_.reset();
+
+        // DEBT: With presence of +Inf, isn't this superfluous?  Perhaps I'm not
+        // doing this right
+        oa_.name(name_, "_count");
+        oa_.label(labels_);
+        oa_.metric(Gauge(calced[i]));
+        oa_.out_ << HTTP_ENDL;
     }
 };
 

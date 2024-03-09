@@ -1,5 +1,8 @@
 #include "../fwd.h"
 
+// DEBT: Pick better name, constexpr if we can
+#define HTTP_ENDL   "\r\n"
+
 namespace embr::prometheus::internal {
 
 // Guidance from
@@ -46,6 +49,9 @@ class OutAssist
 public:
 //#endif
     Stream& out_;
+
+    // DEBT: Being that we use constexpr quantity for label count, we can theoretically
+    // eventually get rid of this
     // # of labels written so far for this line
     int labels_ = 0;
 
@@ -67,10 +73,28 @@ public:
     {
     }
 
-    void name(const char* name, const char* suffix = nullptr)
+    void name(const char* name)
     {
         out_ << name;
-        if(suffix)  out_ << suffix;
+    }
+
+    void name(const char* name, const char* suffix)
+    {
+        out_ << name;
+        out_ << suffix;
+    }
+
+    void endl()
+    {
+        out_ << HTTP_ENDL;
+    }
+
+    void help(const char* name, const char* help, const char* suffix = nullptr)
+    {
+        out_ << "# HELP " << name;
+        if(suffix) out_ << suffix;
+        // DEBT: Inconsistent emitting crlf here, but nowhere else in this class
+        out_ << ' ' << help << HTTP_ENDL;
     }
 
     template <class T>

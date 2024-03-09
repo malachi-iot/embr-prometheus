@@ -7,11 +7,15 @@ using namespace embr;
 using namespace embr::prometheus;
 
 const char* r1 =
+    "# HELP metric2 helper text" HTTP_ENDL
+    "# TYPE metric2 histogram" HTTP_ENDL
     R"(metric2_bucket{instance="abc", poop="def", le="0"} 0)" HTTP_ENDL
     R"(metric2_bucket{instance="abc", poop="def", le="10"} 0)" HTTP_ENDL
     R"(metric2_bucket{instance="abc", poop="def", le="20"} 2)" HTTP_ENDL
     R"(metric2_bucket{instance="abc", poop="def", le="30"} 3)" HTTP_ENDL
-    R"(metric2_bucket{instance="abc", poop="def", le="+Inf"} 4)" HTTP_ENDL;
+    R"(metric2_bucket{instance="abc", poop="def", le="+Inf"} 4)" HTTP_ENDL
+    R"(metric2_sum{instance="abc", poop="def"} 95)" HTTP_ENDL
+    R"(metric2_count{instance="abc", poop="def"} 4)" HTTP_ENDL;
 
 const char* r2 =
     "# TYPE metric3 gauge" HTTP_ENDL
@@ -52,7 +56,7 @@ TEST_CASE("ostream")
             label_names,
             "abc", "def");
 
-        oa2.metric(h);
+        oa2.metric(h, "helper text");
 
         REQUIRE(str == r1);
 
