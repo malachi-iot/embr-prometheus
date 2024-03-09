@@ -51,7 +51,7 @@ public:
         // FIX: Not quite right.  Buckets are less than our equal to which means
         // potentially every bucket gets touched - although we could simulate that
         // only on request instead of accumulating each one (do diffs)
-        bool valid = (((i++ < (bucket_count - 1) && value < buckets) && (bucket = i, true)) || ...);
+        bool valid = (((i++ < (bucket_count - 1) && value <= buckets) && (bucket = i, true)) || ...);
 
         if(valid)
             observe_idx(bucket - 1);

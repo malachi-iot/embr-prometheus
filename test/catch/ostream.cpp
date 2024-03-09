@@ -9,7 +9,7 @@ using namespace embr::prometheus;
 const char* r1 =
     R"(metric2_bucket{instance="abc", poop="def", le="0"} 0)" HTTP_ENDL
     R"(metric2_bucket{instance="abc", poop="def", le="10"} 0)" HTTP_ENDL
-    R"(metric2_bucket{instance="abc", poop="def", le="20"} 1)" HTTP_ENDL
+    R"(metric2_bucket{instance="abc", poop="def", le="20"} 2)" HTTP_ENDL
     R"(metric2_bucket{instance="abc", poop="def", le="30"} 3)" HTTP_ENDL
     R"(metric2_bucket{instance="abc", poop="def", le="+Inf"} 4)" HTTP_ENDL;
 
@@ -30,12 +30,12 @@ TEST_CASE("ostream")
         oa.name("metric1");
 
         h.observe(15);
-        h.observe(21);
+        h.observe(20);
         h.observe(25);
 
         REQUIRE(h.buckets_[0] == 0);
-        REQUIRE(h.buckets_[2] == 1);
-        REQUIRE(h.buckets_[3] == 2);
+        REQUIRE(h.buckets_[2] == 2);
+        REQUIRE(h.buckets_[3] == 1);
 
         bool b = h.observe(35);
 
@@ -43,7 +43,8 @@ TEST_CASE("ostream")
 
         h.get(v1);
 
-        REQUIRE(v1[2] == 1);
+        REQUIRE(v1[1] == 0);
+        REQUIRE(v1[2] == 2);
         REQUIRE(v1[3] == 3);
         REQUIRE(v1[4] == 4);
 

@@ -7,7 +7,7 @@
 using namespace embr;
 using namespace embr::prometheus;
 
-TEST_CASE("TEST")
+TEST_CASE("histogram")
 {
 
 }
