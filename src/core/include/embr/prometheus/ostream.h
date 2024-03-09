@@ -12,6 +12,7 @@
 #include "platform/esp-idf/ostream.h"
 #endif
 
+#include "feature.h"
 #include "fwd.h"
 
 // DEBT: Pick better name, constexpr if we can
@@ -139,16 +140,27 @@ public:
             label(labels.names[i], labels.values[i]);
     }
 
+    // DEBT: Due to https://github.com/malachi-iot/estdlib/issues/32
+    void label(const Labels2<>&)
+    {
+
+    }
+
+
     template <class ...Args>
     void label(const Labels2<Args...>& labels)
     {
+        /*
         // FIX: gonna need estd::get<> on the tuple, which isn't
         // going to work here unless there's a constexpr for waiting for us
         for(int i = 0; i < sizeof...(Args); ++i)
         {
             // TODO: Detect and skip over monostates/nullptrs
             label(labels.names[i], labels.values[i]);
-        }
+        }*/
+
+        // DEBT: See comments in write
+        write(out_, (Labels2<Args...>&)labels);
     }
 
     template <class T>
@@ -215,8 +227,6 @@ public:
     }
 };
 
-#define UPGRADING_LABELS 0
-
 #if UPGRADING_LABELS
 template <class Stream, typename ...LabelValueTypes>
 #else
@@ -228,6 +238,7 @@ class OutAssist2
     const char* name_;
 
 #if UPGRADING_LABELS
+    using labels_type = Labels2<LabelValueTypes...>;
     Labels2<LabelValueTypes...> labels_;
 #else
     Labels labels_;
@@ -253,6 +264,14 @@ public:
         oa_(out),
         name_(name),
         labels_(label_names, std::forward<LabelValueTypes>(values)...)
+    {
+    }
+
+    OutAssist2(Stream& out, const char* name,
+        const labels_type& labels) :
+        oa_(out),
+        name_(name),
+        labels_(labels)
     {
     }
 #else
@@ -298,7 +317,11 @@ public:
         oa_.out_ << "# TYPE " << name_ << "_total counter" << HTTP_ENDL;
         oa_.name(name_, "_total");
         oa_.metric(value);
+#if UPGRADING_LABELS
+        oa_.label(labels_);
+#else
         oa_.label(labels_, label_count);
+#endif
         oa_.out_ << HTTP_ENDL;
     }
 
@@ -310,6 +333,7 @@ public:
 
         value.get(calced);
 
+        // DEBT: Let's resolve this constant warning
         (!(histogram_metric(calced[i], buckets), i++ < sizeof...(buckets)) || ...);
     }
 };
@@ -320,7 +344,7 @@ template <class Metric, class ...Args>
 template <class Streambuf, class Base>
 void metric_put_core<Metric, Args...>::operator()(estd::detail::basic_ostream<Streambuf, Base>& out) const
 {
-    OutAssist2 oa(out, name_);
+    OutAssist2 oa(out, name_, labels_);
 
     oa.metric(metric_, help_);
 }

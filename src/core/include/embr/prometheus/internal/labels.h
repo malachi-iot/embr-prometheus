@@ -24,6 +24,8 @@ struct Labels2
     estd::tuple<Args...> values;
     //std::tuple<Args...> values;
 
+    Labels2(const Labels2&) = default;
+
     constexpr Labels2(const char** n, const estd::tuple<Args...>& v) :
         names{n},
         values{v}

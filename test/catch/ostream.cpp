@@ -6,6 +6,12 @@
 using namespace embr;
 using namespace embr::prometheus;
 
+const char* r1 =
+    R"(metric2_bucketinstance="abc", poop="def"{le="0"} 0)" HTTP_ENDL
+    R"(metric2_bucketinstance="abc", poop="def"{le="10"} 0)" HTTP_ENDL
+    R"(metric2_bucketinstance="abc", poop="def"{le="20"} 1)" HTTP_ENDL
+    R"(metric2_bucketinstance="abc", poop="def"{le="30"} 3)" HTTP_ENDL;
+
 TEST_CASE("ostream")
 {
     estd::layer1::ostringstream<512> out;
@@ -46,13 +52,18 @@ TEST_CASE("ostream")
         out.rdbuf()->clear();
 
         const char* label_names[] { "instance", "poop" };
+#if UPGRADING_LABELS
+        OutAssist2<decltype(out), const char*, const char*> oa2(out, "metric2",
+            label_names,
+            "abc", "def");
+#else
         const char* label_values[] { "abc", "def" };
         OutAssist2<decltype(out), 2> oa2(out, "metric2", label_names, label_values);
+#endif
 
-        // Working pretty well, just hard to compare output
         oa2.metric(h);
 
-        //REQUIRE(str == "metric2");
+        REQUIRE(str == r1);
 
         out.rdbuf()->clear();
 
