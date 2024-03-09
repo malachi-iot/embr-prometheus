@@ -62,8 +62,7 @@ class OutAssist2
     template <class T, class Bucket = T>
     void histogram_metric(T value, Bucket bucket)
     {
-        oa_.metric_histogram(value,
-            context_->name_, bucket, context_->labels_);
+        oa_.metric_histogram(value, *context_, bucket);
         oa_.reset();
 
         oa_.out_ << HTTP_ENDL;
@@ -89,7 +88,8 @@ public:
 
         oa_.out_ << "# TYPE " << context_->name_ << " gauge" << HTTP_ENDL;
         oa_.name(context_->name_);
-        oa_.label(context_->labels_);
+        if constexpr (context_type::has_labels)
+            oa_.label(context_->labels_);
         oa_.metric(value);
         oa_.out_ << HTTP_ENDL;
     }
@@ -165,9 +165,27 @@ constexpr internal::metric_put_core<Counter<T> >
 
 template <class T>
 constexpr internal::metric_put_core<Gauge<T> >
-put_metric_gauge(const T& value, const char* name, const char* help = nullptr)
+    put_metric_gauge(const T& value, const char* name, const char* help = nullptr)
 {
     return { { value }, name, help };
+}
+
+template <class T, class ...Args>
+internal::metric_put_core<Gauge<T>, Args...>
+    put_metric_gauge(const T& value, const char* name, const char* help,
+        const char** label_names,
+        Args&&...args)
+{
+    // FIX: Works terrible because Labels goes out of scope and isn't copied
+    Labels<Args...> labels(label_names, std::forward<Args>(args)...);
+    Gauge<T> g(value);
+
+    //return { { value }, name, help, labels };
+    return internal::metric_put_core<Gauge<T>, Args...>(
+        g,
+        name,
+        help,
+        labels);
 }
 
 template <class Metric, class ...LabelValues>

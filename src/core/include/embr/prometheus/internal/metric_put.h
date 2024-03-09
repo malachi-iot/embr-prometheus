@@ -21,14 +21,15 @@ struct ContextBase
     {}
 };
 
-/*
 template <>
 struct ContextBase<>
 {
     static constexpr bool has_labels = false;
 
     const char* name_;
-};  */
+
+    constexpr explicit ContextBase(const char* name) : name_{name}    {}
+};
 
 template <class Metric, class ...Args>
 struct Context : ContextBase<Args...>
@@ -41,6 +42,11 @@ struct Context : ContextBase<Args...>
         base_type(name, labels),
         metric_{metric}
     {}
+
+    constexpr Context(const Metric& metric, const char* name) :
+        base_type(name),
+        metric_{metric}
+    {}
 };
 
 
@@ -51,18 +57,15 @@ struct metric_put_core : estd::internal::ostream_functor_tag
     Context<Metric, Args...> context_;
     const char* help_ = nullptr;
 
-    /*
-    constexpr metric_put_core(const Metric& metric, const char* name, const char* help) :
-        metric_{metric},
-        name_{name},
-        help_{help},
-        // DEBT: Probably wanna null label names out here
-        labels_{label_names}
-    {}  */
-
     constexpr metric_put_core(const Metric& metric, const char* name, const char* help,
         const Labels<Args...>& labels) :
         context_{metric, name, labels},
+        help_{help}
+    {}
+
+    constexpr metric_put_core(const Metric& metric, const char* name, const char* help)
+        :
+        context_{metric, name},
         help_{help}
     {}
 

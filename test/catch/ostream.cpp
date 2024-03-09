@@ -58,6 +58,8 @@ TEST_CASE("ostream")
 
         const char* label_names[] { "instance", "poop" };
         Labels<const char*, const char*> labels(label_names, "abc", "def");
+        // TODO: Make a deduction guide for this guy
+        //Labels labels(label_names, "abc", "def");
         internal::ContextBase<const char*, const char*> context{"metric2", labels};
         OutAssist2<decltype(out), const char*, const char*> oa2(out, &context);
 
@@ -110,7 +112,12 @@ TEST_CASE("ostream")
     }
     SECTION("convenience")
     {
-        //put_metric_gauge(5, "metric1");
+        out << put_metric_gauge(5, "metric1", "help");
+        // FIX: Something again wrong with tuple::visit, this time when processing
+        // a char array ref vs const char*
+        //out << put_metric_gauge(5, "metric1", "help", labels, 7, (const char*) "hi");
+
+        //REQUIRE(str == R"(metric1)");
     }
     SECTION("labels")
     {

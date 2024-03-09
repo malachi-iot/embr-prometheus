@@ -112,13 +112,6 @@ public:
         ++labels_;
     }
 
-    // DEBT: Due to https://github.com/malachi-iot/estdlib/issues/32
-    void label(const Labels2<>&)
-    {
-
-    }
-
-
     template <class ...Args>
     void label(const Labels2<Args...>& labels)
     {
@@ -142,7 +135,8 @@ public:
     void name_and_labels(const ContextBase<Args...>& context, const char* suffix)
     {
         name(context.name_, suffix);
-        label(context.labels_);
+        if constexpr (ContextBase<Args...>::has_labels)
+            label(context.labels_);
     }
 
     template <class T>
@@ -163,12 +157,11 @@ public:
 
     template <class T, class Bucket, typename ...LabelValues>
     void metric_histogram(const T& value,
-        const char* n,
-        Bucket bucket,   // DEBT: Do this compile time
-        const Labels2<LabelValues...>& labels)
+        const ContextBase<LabelValues...>& context,
+        Bucket bucket    // DEBT: Do this compile time
+        )
     {
-        name(n, "_bucket");
-        label(labels);
+        name_and_labels(context, "_bucket");
         label("le", bucket);
         finalize_label();
 
