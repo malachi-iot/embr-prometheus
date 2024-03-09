@@ -4,6 +4,29 @@
 
 namespace embr::prometheus::internal {
 
+// EXPERIMENTAL, for optimization
+// Remember usually Metric is a const ref but once in a while it's an inline class
+template <class Metric, class ...Args>
+struct Context
+{
+    static constexpr bool has_labels = true;
+
+    const char* name_;
+    Metric metric_;
+    const Labels<Args...>& labels_;
+};
+
+template <class Metric>
+struct Context<Metric>
+{
+    static constexpr bool has_labels = false;
+
+    const char* name_;
+    Metric metric_;
+};
+
+
+// DEBT: Inconsistent convention
 template <class Metric, class ...Args>
 struct metric_put_core : estd::internal::ostream_functor_tag
 {
