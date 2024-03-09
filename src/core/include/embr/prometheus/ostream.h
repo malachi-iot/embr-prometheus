@@ -51,6 +51,9 @@ void write(estd::detail::basic_ostream<Streambuf, Base>& out,
 template <class Stream, typename ...LabelValueTypes>
 class OutAssist2
 {
+    // EXPERIMENTAL
+    internal::ContextBase<LabelValueTypes...>* context_;
+
     internal::OutAssist<Stream> oa_;
     const char* name_;
 

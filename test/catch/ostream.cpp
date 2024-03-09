@@ -90,6 +90,13 @@ TEST_CASE("ostream")
             mp1(out);
 
             REQUIRE(str == r3);
+
+            auto l2 = make_labels(label_names, 2, "hello");
+
+            internal::metric_put_core
+            //internal::metric_put<Counter<int> >
+                //mp2(c, "metric2", "help", { label_names, 2, "hello" });
+                mp2(c, "metric2", "help", l2);
         }
         SECTION("gauge")
         {

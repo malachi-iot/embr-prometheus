@@ -31,8 +31,17 @@ struct Labels
     {}
 };
 
+//template <class ...Args> Labels(const char**, Args&&...args) ->
+    //Labels<const char**, Args...>;
+
 template <class ...Args>
 using Labels2 = Labels<Args...>;
+
+template <class ...Args>
+Labels<Args...> make_labels(const char** n, Args&&...args)
+{
+    return Labels<Args...>(n, std::forward<Args>(args)...);
+}
 
 
 }
