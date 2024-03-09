@@ -159,8 +159,11 @@ public:
             label(labels.names[i], labels.values[i]);
         }*/
 
+        prep_label();
         // DEBT: See comments in write
         write(out_, (Labels2<Args...>&)labels);
+
+        labels_ += sizeof... (Args);
     }
 
     template <class T>

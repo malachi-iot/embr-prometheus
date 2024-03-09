@@ -7,10 +7,10 @@ using namespace embr;
 using namespace embr::prometheus;
 
 const char* r1 =
-    R"(metric2_bucketinstance="abc", poop="def"{le="0"} 0)" HTTP_ENDL
-    R"(metric2_bucketinstance="abc", poop="def"{le="10"} 0)" HTTP_ENDL
-    R"(metric2_bucketinstance="abc", poop="def"{le="20"} 1)" HTTP_ENDL
-    R"(metric2_bucketinstance="abc", poop="def"{le="30"} 3)" HTTP_ENDL;
+    R"(metric2_bucket{instance="abc", poop="def", le="0"} 0)" HTTP_ENDL
+    R"(metric2_bucket{instance="abc", poop="def", le="10"} 0)" HTTP_ENDL
+    R"(metric2_bucket{instance="abc", poop="def", le="20"} 1)" HTTP_ENDL
+    R"(metric2_bucket{instance="abc", poop="def", le="30"} 3)" HTTP_ENDL;
 
 TEST_CASE("ostream")
 {
