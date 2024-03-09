@@ -13,19 +13,24 @@ const char* r1 =
     R"(metric2_bucket{instance="abc", poop="def", le="30"} 3)" HTTP_ENDL
     R"(metric2_bucket{instance="abc", poop="def", le="+Inf"} 4)" HTTP_ENDL;
 
+const char* r2 =
+    "# TYPE metric3 gauge" HTTP_ENDL
+    R"(metric3{instance="1", poop="5"} 23)" HTTP_ENDL;
+
 TEST_CASE("ostream")
 {
     estd::layer1::ostringstream<512> out;
     const auto& str = out.rdbuf()->str();
 
+    // DEBT: Clunky
+    const char* labels[] = { "instance", "vendor" };
+    embr::prometheus::label_names = labels;
+
     SECTION("basics")
     {
         Gauge<int> g;
         Histogram<int, int, 0, 10, 20, 30> h;
-        internal::OutAssist<decltype(out)> oa(out);
-
-        // +1 for +Inf
-        int v1[5];
+        internal::OutAssist oa(out);
 
         h.observe(15);
         h.observe(20);
@@ -53,9 +58,24 @@ TEST_CASE("ostream")
 
         out.rdbuf()->clear();
 
-        out << put_metric(g, "metric3");
+        Labels l(label_names, 1, 5);
+        out << put_metric(g, "metric3", nullptr, l);
 
-        REQUIRE(str == "# TYPE metric3 gauge\r\nmetric3 23\r\n");
+        REQUIRE(str == r2);
+    }
+    SECTION("raw metric_put")
+    {
+        SECTION("gauge")
+        {
+            Gauge<int> g;
+
+            Labels<int, const char*> l(label_names, 1, "hello");
+
+            internal::metric_put<Gauge<int>, int, const char*>
+                mp1(g, "metric1", "help", l);
+
+            mp1(out);
+        }
     }
     SECTION("labels")
     {

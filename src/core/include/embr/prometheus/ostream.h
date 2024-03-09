@@ -98,12 +98,12 @@ public:
     void metric(const Gauge<T>& value, const char* help = nullptr)
     {
         if(help)
-            oa_.out_ << "# HELP " << name_ << help << HTTP_ENDL;
+            oa_.out_ << "# HELP " << name_ << ' ' << help << HTTP_ENDL;
 
         oa_.out_ << "# TYPE " << name_ << " gauge" << HTTP_ENDL;
         oa_.name(name_);
-        oa_.metric(value);
         oa_.label(labels_);
+        oa_.metric(value);
         oa_.out_ << HTTP_ENDL;
     }
 
@@ -134,6 +134,8 @@ public:
         (!(histogram_metric(calced[i], buckets), i++ < sizeof...(buckets)) || ...);
 
         histogram_metric(calced[i], "+Inf");
+
+        //oa_.name(name_, "_sum");
     }
 };
 
@@ -179,6 +181,8 @@ put_metric(const Metric& metric, const char* name, const char* help,
     return { metric, name, help, labels };
 }
 
+// DEBT: THis one collides with above Label one, so temporarily disabling
+/*
 template <class Metric, class ...LabelValues>
 constexpr internal::metric_put<Metric, LabelValues...>
 put_metric(const Metric& metric, const char* name, const char* help,
@@ -187,6 +191,6 @@ put_metric(const Metric& metric, const char* name, const char* help,
     return { metric, name, help, Labels<LabelValues...>(label_names,
         estd::tuple<LabelValues...>(std::forward<LabelValues>(label_values)...)) };
 }
-
+*/
 
 }}

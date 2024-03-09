@@ -47,9 +47,6 @@ public:
         unsigned i = 0;
         unsigned bucket;
         // DEBT: bucket_count -1 is a crude way of "catch all" for INF
-        // FIX: Not quite right.  Buckets are less than our equal to which means
-        // potentially every bucket gets touched - although we could simulate that
-        // only on request instead of accumulating each one (do diffs)
         bool valid = (((i++ < (bucket_count - 1) && value <= buckets) && (bucket = i, true)) || ...);
 
         // DEBT: Quite crude
