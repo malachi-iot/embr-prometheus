@@ -21,6 +21,11 @@ const char* r2 =
     "# TYPE metric3 gauge" HTTP_ENDL
     R"(metric3{instance="1", poop="5"} 23)" HTTP_ENDL;
 
+const char* r3 =
+    "# HELP metric1_total help" HTTP_ENDL
+    "# TYPE metric1_total counter" HTTP_ENDL
+    R"(metric1_total{instance="1", vendor="hello"} 3)" HTTP_ENDL;
+
 TEST_CASE("ostream")
 {
     estd::layer1::ostringstream<512> out;
@@ -69,11 +74,26 @@ TEST_CASE("ostream")
     }
     SECTION("raw metric_put")
     {
+        Labels<int, const char*> l(label_names, 1, "hello");
+
+        SECTION("counter")
+        {
+            Counter<int> c;
+
+            ++c;
+            ++c;
+            ++c;
+
+            internal::metric_put<Counter<int>, int, const char*>
+                mp1(c, "metric1", "help", l);
+
+            mp1(out);
+
+            REQUIRE(str == r3);
+        }
         SECTION("gauge")
         {
             Gauge<int> g;
-
-            Labels<int, const char*> l(label_names, 1, "hello");
 
             internal::metric_put<Gauge<int>, int, const char*>
                 mp1(g, "metric1", "help", l);

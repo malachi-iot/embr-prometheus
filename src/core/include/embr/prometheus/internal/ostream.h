@@ -1,5 +1,7 @@
 #include "../fwd.h"
 
+#include <estd/ostream.h>
+
 // DEBT: Pick better name, constexpr if we can
 #define HTTP_ENDL   "\r\n"
 
@@ -42,6 +44,7 @@ void write_one_label(estd::detail::basic_ostream<Streambuf, Base>& out,
 
 
 
+//template <ESTD_CPP_CONCEPT(estd::concepts::v1::OutStream) Stream>
 template <class Stream>
 class OutAssist
 {

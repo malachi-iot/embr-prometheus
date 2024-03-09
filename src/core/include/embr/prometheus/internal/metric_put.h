@@ -10,6 +10,7 @@ struct metric_put_core : estd::internal::ostream_functor_tag
     const Metric metric_;
     const char* name_;
     const char* help_ = nullptr;
+    // DEBT: Make this a pointer
     Labels<Args...> labels_;
 
     constexpr metric_put_core(const Metric& metric, const char* name, const char* help) :
