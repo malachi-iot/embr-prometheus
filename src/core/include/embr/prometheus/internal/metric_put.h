@@ -4,29 +4,43 @@
 
 namespace embr::prometheus::internal {
 
-// EXPERIMENTAL, for optimization
 // Remember usually Metric is a const ref but once in a while it's an inline class
 template <class ...Args>
 struct ContextBase
 {
     static constexpr bool has_labels = true;
 
+    using labels_type = Labels<Args...>;
+
     const char* name_;
-    const Labels<Args...>& labels_;
+    const labels_type& labels_;
+
+    constexpr ContextBase(const char* name, const labels_type& labels) :
+        name_{name},
+        labels_{labels}
+    {}
 };
 
+/*
 template <>
 struct ContextBase<>
 {
     static constexpr bool has_labels = false;
 
     const char* name_;
-};
+};  */
 
 template <class Metric, class ...Args>
 struct Context : ContextBase<Args...>
 {
+    using base_type = ContextBase<Args...>;
+
     const Metric metric_;
+
+    constexpr Context(const Metric& metric, const char* name, const Labels<Args...>& labels) :
+        base_type(name, labels),
+        metric_{metric}
+    {}
 };
 
 
@@ -34,11 +48,8 @@ struct Context : ContextBase<Args...>
 template <class Metric, class ...Args>
 struct metric_put_core : estd::internal::ostream_functor_tag
 {
-    const Metric metric_;
-    const char* name_;
+    Context<Metric, Args...> context_;
     const char* help_ = nullptr;
-    // DEBT: Make this a pointer
-    Labels<Args...> labels_;
 
     /*
     constexpr metric_put_core(const Metric& metric, const char* name, const char* help) :
@@ -51,10 +62,8 @@ struct metric_put_core : estd::internal::ostream_functor_tag
 
     constexpr metric_put_core(const Metric& metric, const char* name, const char* help,
         const Labels<Args...>& labels) :
-        metric_{metric},
-        name_{name},
-        help_{help},
-        labels_{labels}
+        context_{metric, name, labels},
+        help_{help}
     {}
 
     template <class Streambuf, class Base>

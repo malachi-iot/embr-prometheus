@@ -57,9 +57,9 @@ TEST_CASE("ostream")
         out.rdbuf()->clear();
 
         const char* label_names[] { "instance", "poop" };
-        OutAssist2<decltype(out), const char*, const char*> oa2(out, "metric2",
-            label_names,
-            "abc", "def");
+        Labels<const char*, const char*> labels(label_names, "abc", "def");
+        internal::ContextBase<const char*, const char*> context{"metric2", labels};
+        OutAssist2<decltype(out), const char*, const char*> oa2(out, &context);
 
         oa2.metric(h, "helper text");
 
@@ -107,6 +107,10 @@ TEST_CASE("ostream")
 
             mp1(out);
         }
+    }
+    SECTION("convenience")
+    {
+        //put_metric_gauge(5, "metric1");
     }
     SECTION("labels")
     {

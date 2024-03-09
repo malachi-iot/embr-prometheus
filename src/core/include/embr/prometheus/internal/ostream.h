@@ -138,6 +138,13 @@ public:
         labels_ += sizeof... (Args);
     }
 
+    template <class ...Args>
+    void name_and_labels(const ContextBase<Args...>& context, const char* suffix)
+    {
+        name(context.name_, suffix);
+        label(context.labels_);
+    }
+
     template <class T>
     void metric(const Gauge<T>& value)
     {

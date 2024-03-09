@@ -51,42 +51,30 @@ void write(estd::detail::basic_ostream<Streambuf, Base>& out,
 template <class Stream, typename ...LabelValueTypes>
 class OutAssist2
 {
-    // EXPERIMENTAL
-    internal::ContextBase<LabelValueTypes...>* context_;
+    using context_type = internal::ContextBase<LabelValueTypes...>;
+    const context_type* context_;
 
     internal::OutAssist<Stream> oa_;
-    const char* name_;
 
     using labels_type = Labels<LabelValueTypes...>;
-    Labels<LabelValueTypes...> labels_;
 
     // Bucket has distinct type to flow through "+Int" string
     template <class T, class Bucket = T>
     void histogram_metric(T value, Bucket bucket)
     {
-        oa_.metric_histogram(value, name_, bucket, labels_);
+        oa_.metric_histogram(value,
+            context_->name_, bucket, context_->labels_);
         oa_.reset();
 
         oa_.out_ << HTTP_ENDL;
     }
 
 public:
-    OutAssist2(Stream& out, const char* name,
-        const char** label_names = embr::prometheus::label_names,
-        LabelValueTypes&&...values) :
+    OutAssist2(Stream& out, const context_type* context)
+        :
         oa_(out),
-        name_(name),
-        labels_(label_names, std::forward<LabelValueTypes>(values)...)
-    {
-    }
-
-    OutAssist2(Stream& out, const char* name,
-        const labels_type& labels) :
-        oa_(out),
-        name_(name),
-        labels_(labels)
-    {
-    }
+        context_(context)
+    {}
 
     template <class Impl>
     void help(const estd::detail::basic_string<Impl>& s)
@@ -97,11 +85,11 @@ public:
     template <class T>
     void metric(const Gauge<T>& value, const char* help = nullptr)
     {
-        if(help)    oa_.help(name_, help);
+        if(help)    oa_.help(context_->name_, help);
 
-        oa_.out_ << "# TYPE " << name_ << " gauge" << HTTP_ENDL;
-        oa_.name(name_);
-        oa_.label(labels_);
+        oa_.out_ << "# TYPE " << context_->name_ << " gauge" << HTTP_ENDL;
+        oa_.name(context_->name_);
+        oa_.label(context_->labels_);
         oa_.metric(value);
         oa_.out_ << HTTP_ENDL;
     }
@@ -109,11 +97,10 @@ public:
     template <class T>
     void metric(const Counter<T>& value, const char* help = nullptr)
     {
-        if(help)    oa_.help(name_, help, "_total");
+        if(help)    oa_.help(context_->name_, help, "_total");
 
-        oa_.out_ << "# TYPE " << name_ << "_total counter" << HTTP_ENDL;
-        oa_.name(name_, "_total");
-        oa_.label(labels_);
+        oa_.out_ << "# TYPE " << context_->name_ << "_total counter" << HTTP_ENDL;
+        oa_.name_and_labels(*context_, "_total");
         oa_.metric(value);
         oa_.out_ << HTTP_ENDL;
     }
@@ -122,8 +109,8 @@ public:
     template <class T, typename Bucket, Bucket... buckets>
     void metric(const Histogram<T, Bucket, buckets...>& value, const char* help = nullptr)
     {
-        if(help)    oa_.help(name_, help);
-        oa_.out_ << "# TYPE " << name_ << " histogram" << HTTP_ENDL;
+        if(help)    oa_.help(context_->name_, help);
+        oa_.out_ << "# TYPE " << context_->name_ << " histogram" << HTTP_ENDL;
 
         int i = 0;
         // DEBT: Easy to forget "+Inf" slot
@@ -136,16 +123,14 @@ public:
 
         histogram_metric(calced[i], "+Inf");
 
-        oa_.name(name_, "_sum");
-        oa_.label(labels_);
+        oa_.name_and_labels(*context_, "_sum");
         oa_.metric(Gauge(value.sum()));
         oa_.out_ << HTTP_ENDL;
         oa_.reset();
 
         // DEBT: With presence of +Inf, isn't this superfluous?  Perhaps I'm not
         // doing this right
-        oa_.name(name_, "_count");
-        oa_.label(labels_);
+        oa_.name_and_labels(*context_, "_count");
         oa_.metric(Gauge(calced[i]));
         oa_.out_ << HTTP_ENDL;
     }
@@ -157,9 +142,9 @@ template <class Metric, class ...Args>
 template <class Streambuf, class Base>
 inline void metric_put_core<Metric, Args...>::operator()(estd::detail::basic_ostream<Streambuf, Base>& out) const
 {
-    OutAssist2 oa(out, name_, labels_);
+    OutAssist2 oa(out, &context_);
 
-    oa.metric(metric_, help_);
+    oa.metric(context_.metric_, help_);
 }
 
 }
