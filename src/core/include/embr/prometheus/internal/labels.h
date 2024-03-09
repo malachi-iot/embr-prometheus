@@ -11,31 +11,28 @@ namespace embr::prometheus {
 extern const char** label_names;
 
 
-struct Labels
-{
-    const char** names;
-    const char** values;
-};
-
 template <class ...Args>
-struct Labels2
+struct Labels
 {
     const char** names;
     estd::tuple<Args...> values;
     //std::tuple<Args...> values;
 
-    Labels2(const Labels2&) = default;
+    Labels(const Labels&) = default;
 
-    constexpr Labels2(const char** n, const estd::tuple<Args...>& v) :
+    constexpr Labels(const char** n, const estd::tuple<Args...>& v) :
         names{n},
         values{v}
     {}
 
-    explicit constexpr Labels2(const char** n, Args&&... v) :
+    explicit constexpr Labels(const char** n, Args&&... v) :
         names{n},
         values(std::forward<Args>(v)...)
     {}
 };
+
+template <class ...Args>
+using Labels2 = Labels<Args...>;
 
 
 }

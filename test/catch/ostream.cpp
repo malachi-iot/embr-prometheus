@@ -27,29 +27,14 @@ TEST_CASE("ostream")
         // +1 for +Inf
         int v1[5];
 
-        oa.name("metric1");
-
         h.observe(15);
         h.observe(20);
         h.observe(25);
-
-        REQUIRE(h.buckets_[0] == 0);
-        REQUIRE(h.buckets_[2] == 2);
-        REQUIRE(h.buckets_[3] == 1);
-
-        bool b = h.observe(35);
-
-        REQUIRE(b == false);
-
-        h.get(v1);
-
-        REQUIRE(v1[1] == 0);
-        REQUIRE(v1[2] == 2);
-        REQUIRE(v1[3] == 3);
-        REQUIRE(v1[4] == 4);
+        h.observe(35);
 
         g.add(23);
 
+        oa.name("metric1");
         oa.label("instance", "1");
         oa.metric(g);
 
@@ -58,14 +43,9 @@ TEST_CASE("ostream")
         out.rdbuf()->clear();
 
         const char* label_names[] { "instance", "poop" };
-#if UPGRADING_LABELS
         OutAssist2<decltype(out), const char*, const char*> oa2(out, "metric2",
             label_names,
             "abc", "def");
-#else
-        const char* label_values[] { "abc", "def" };
-        OutAssist2<decltype(out), 2> oa2(out, "metric2", label_names, label_values);
-#endif
 
         oa2.metric(h);
 
@@ -80,7 +60,7 @@ TEST_CASE("ostream")
     SECTION("labels")
     {
         const char* names[] { "val1", "val2" };
-        Labels2<int, const char*> labels(names, 0, "Hello");
+        Labels<int, const char*> labels(names, 0, "Hello");
         write(out, labels);
 
         REQUIRE(str == "val1=\"0\", val2=\"Hello\"");

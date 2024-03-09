@@ -65,7 +65,7 @@ template <class Streambuf, class Base, typename ...LabelValues>
 void write(estd::detail::basic_ostream<Streambuf, Base>& out,
     // DEBT: Bug https://github.com/malachi-iot/estdlib/issues/32 keeps
     // us from const'ing this
-    Labels2<LabelValues...>& labels)
+    Labels<LabelValues...>& labels)
 {
     // NOTE: Would prefer explicit c++20 generic syntax, but we want
     // to retain c++17 compatibility
@@ -134,12 +134,6 @@ public:
         ++labels_;
     }
 
-    void label(const Labels& labels, int label_count)
-    {
-        for(int i = 0; i < label_count; ++i)
-            label(labels.names[i], labels.values[i]);
-    }
-
     // DEBT: Due to https://github.com/malachi-iot/estdlib/issues/32
     void label(const Labels2<>&)
     {
@@ -182,34 +176,6 @@ public:
         out_ << ' ' << value.value();
     }
 
-    template <class Counter, class T, T... buckets>
-    void metric(const Histogram<Counter, T, buckets...>& value, unsigned idx,
-        const char* n,
-        T bucket,   // DEBT: Do this compile time
-        const Labels& labels, int label_count)
-    {
-        name(n, "_bucket");
-        label("le", bucket);
-        label(labels, label_count);
-        finalize_label();
-
-        out_ << ' ' << value.buckets_[idx];
-    }
-
-    template <class T>
-    void metric_histogram(const T& value,
-        const char* n,
-        T bucket,   // DEBT: Do this compile time
-        const Labels& labels, int label_count)
-    {
-        name(n, "_bucket");
-        label("le", bucket);
-        label(labels, label_count);
-        finalize_label();
-
-        out_ << ' ' << value;
-    }
-
     template <class T, class Bucket, typename ...LabelValues>
     void metric_histogram(const T& value,
         const char* n,
@@ -230,39 +196,26 @@ public:
     }
 };
 
-#if UPGRADING_LABELS
 template <class Stream, typename ...LabelValueTypes>
-#else
-template <class Stream, unsigned label_count = 0>
-#endif
 class OutAssist2
 {
     OutAssist<Stream> oa_;
     const char* name_;
 
-#if UPGRADING_LABELS
-    using labels_type = Labels2<LabelValueTypes...>;
-    Labels2<LabelValueTypes...> labels_;
-#else
-    Labels labels_;
-#endif
+    using labels_type = Labels<LabelValueTypes...>;
+    Labels<LabelValueTypes...> labels_;
 
     // Bucket has distinct type to flow through "+Int" string
     template <class T, class Bucket = T>
     void histogram_metric(T value, Bucket bucket)
     {
-#if UPGRADING_LABELS
         oa_.metric_histogram(value, name_, bucket, labels_);
-#else
-        oa_.metric_histogram(value, name_, bucket, labels_, label_count);
-#endif
         oa_.reset();
 
         oa_.out_ << HTTP_ENDL;
     }
 
 public:
-#if UPGRADING_LABELS
     OutAssist2(Stream& out, const char* name,
         const char** label_names, LabelValueTypes&&...values) :
         oa_(out),
@@ -278,16 +231,6 @@ public:
         labels_(labels)
     {
     }
-#else
-    OutAssist2(Stream& out, const char* name,
-        const char** label_names = nullptr,
-        const char** label_values = nullptr) :
-        oa_(out),
-        name_(name),
-        labels_{label_names, label_values}
-    {
-    }
-#endif
 
     template <class Impl>
     void help(const estd::detail::basic_string<Impl>& s)
@@ -304,11 +247,7 @@ public:
         oa_.out_ << "# TYPE " << name_ << " gauge" << HTTP_ENDL;
         oa_.name(name_);
         oa_.metric(value);
-#if UPGRADING_LABELS
         oa_.label(labels_);
-#else
-        oa_.label(labels_, label_count);
-#endif
         oa_.out_ << HTTP_ENDL;
     }
 
@@ -321,11 +260,7 @@ public:
         oa_.out_ << "# TYPE " << name_ << "_total counter" << HTTP_ENDL;
         oa_.name(name_, "_total");
         oa_.metric(value);
-#if UPGRADING_LABELS
         oa_.label(labels_);
-#else
-        oa_.label(labels_, label_count);
-#endif
         oa_.out_ << HTTP_ENDL;
     }
 
@@ -349,7 +284,7 @@ namespace internal {
 
 template <class Metric, class ...Args>
 template <class Streambuf, class Base>
-void metric_put_core<Metric, Args...>::operator()(estd::detail::basic_ostream<Streambuf, Base>& out) const
+inline void metric_put_core<Metric, Args...>::operator()(estd::detail::basic_ostream<Streambuf, Base>& out) const
 {
     OutAssist2 oa(out, name_, labels_);
 
