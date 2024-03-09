@@ -22,7 +22,7 @@ TEST_CASE("ostream")
     {
         Gauge<int> g;
         Histogram<int, int, 0, 10, 20, 30> h;
-        OutAssist<decltype(out)> oa(out);
+        internal::OutAssist<decltype(out)> oa(out);
 
         // +1 for +Inf
         int v1[5];

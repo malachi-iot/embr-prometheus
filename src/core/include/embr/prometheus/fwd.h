@@ -1,5 +1,7 @@
 #pragma once
 
+#include "feature.h"
+
 namespace embr { namespace prometheus {
 
 struct metric_tag {};

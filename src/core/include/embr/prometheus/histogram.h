@@ -42,7 +42,6 @@ public:
         // Lots of help from
         // https://www.foonathan.net/2020/05/fold-tricks/
 
-        // TODO: We need the 'inf' one also
         // "The +Inf bucket must always be present"
 
         unsigned i = 0;
@@ -53,6 +52,7 @@ public:
         // only on request instead of accumulating each one (do diffs)
         bool valid = (((i++ < (bucket_count - 1) && value <= buckets) && (bucket = i, true)) || ...);
 
+        // DEBT: Quite crude
         if(valid)
             observe_idx(bucket - 1);
         else
