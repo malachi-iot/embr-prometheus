@@ -171,21 +171,12 @@ constexpr internal::metric_put_core<Gauge<T> >
 }
 
 template <class T, class ...Args>
-internal::metric_put_core<Gauge<T>, Args...>
+constexpr internal::metric_put_core<Gauge<T>, Args...>
     put_metric_gauge(const T& value, const char* name, const char* help,
         const char** label_names,
         Args&&...args)
 {
-    // FIX: Works terrible because Labels goes out of scope and isn't copied
-    Labels<Args...> labels(label_names, std::forward<Args>(args)...);
-    Gauge<T> g(value);
-
-    //return { { value }, name, help, labels };
-    return internal::metric_put_core<Gauge<T>, Args...>(
-        g,
-        name,
-        help,
-        labels);
+    return { { value }, name, help, Labels{ label_names, std::forward<Args>(args)...} };
 }
 
 template <class Metric, class ...LabelValues>

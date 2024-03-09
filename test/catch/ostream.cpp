@@ -26,6 +26,11 @@ const char* r3 =
     "# TYPE metric1_total counter" HTTP_ENDL
     R"(metric1_total{instance="1", vendor="hello"} 3)" HTTP_ENDL;
 
+const char* r4 =
+    "# HELP metric1 help" HTTP_ENDL
+    "# TYPE metric1 gauge" HTTP_ENDL
+    R"(metric1{instance="7", vendor="hi"} 5)" HTTP_ENDL;
+
 TEST_CASE("ostream")
 {
     estd::layer1::ostringstream<512> out;
@@ -57,11 +62,11 @@ TEST_CASE("ostream")
         out.rdbuf()->clear();
 
         const char* label_names[] { "instance", "poop" };
-        Labels<const char*, const char*> labels(label_names, "abc", "def");
         // TODO: Make a deduction guide for this guy
         //Labels labels(label_names, "abc", "def");
-        internal::ContextBase<const char*, const char*> context{"metric2", labels};
-        OutAssist2<decltype(out), const char*, const char*> oa2(out, &context);
+        internal::ContextBase<const char*, const char*> context{"metric2",
+            label_names, "abc", "def"};
+        OutAssist2 oa2(out, &context);
 
         oa2.metric(h, "helper text");
 
@@ -112,12 +117,11 @@ TEST_CASE("ostream")
     }
     SECTION("convenience")
     {
-        out << put_metric_gauge(5, "metric1", "help");
-        // FIX: Something again wrong with tuple::visit, this time when processing
-        // a char array ref vs const char*
-        //out << put_metric_gauge(5, "metric1", "help", labels, 7, (const char*) "hi");
+        //out << put_metric_gauge(5, "metric1", "help");
+        // DEBT: https://github.com/malachi-iot/estdlib/issues/32 forces a (const char*) here
+        out << put_metric_gauge(5, "metric1", "help", labels, 7, (const char*) "hi");
 
-        //REQUIRE(str == R"(metric1)");
+        REQUIRE(str == r4);
     }
     SECTION("labels")
     {

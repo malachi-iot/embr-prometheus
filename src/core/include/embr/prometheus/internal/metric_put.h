@@ -13,11 +13,16 @@ struct ContextBase
     using labels_type = Labels<Args...>;
 
     const char* name_;
-    const labels_type& labels_;
+    const labels_type labels_;
 
     constexpr ContextBase(const char* name, const labels_type& labels) :
         name_{name},
         labels_{labels}
+    {}
+
+    constexpr ContextBase(const char* name, const char** label_names, Args&&...args) :
+        name_{name},
+        labels_{label_names, std::forward<Args>(args)...}
     {}
 };
 
