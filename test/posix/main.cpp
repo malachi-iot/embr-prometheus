@@ -76,6 +76,9 @@ int main()
 
         //client_in.read(buf, sizeof(buf));
 
+        // TODO: Once things work, announce on
+        // https://prometheus.io/docs/instrumenting/writing_exporters/#metrics
+
         http_respond_ok(client_out);
 
         client_out << put_metric(++request_count, "request", "help");
@@ -84,7 +87,7 @@ int main()
             {"inst", "str"}, 0, (const char*)"hello2u");
 
         client_fd.shutdown(SHUT_RDWR);
-        //client_fd.close();
+        client_fd.close();
     }
 
     return 0;
