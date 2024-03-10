@@ -11,15 +11,18 @@ set(CMAKE_CXX_STANDARD 17)
 include(../../tools/cmake/setvars.cmake)
 
 FetchContent_Declare(
-    embr
+    estd
     SOURCE_SUBDIR   src
-    GIT_REPOSITORY  git@github.com:malachi-iot/embr.git
+    #GIT_REPOSITORY  git@github.com:malachi-iot/embr.git
+    GIT_REPOSITORY  https://github.com/malachi-iot/estdlib.git
     # DEBT: Attach this to a proper release tag
-    GIT_TAG         alpha
+    #GIT_TAG         alpha
+    GIT_TAG         v0.7.0
     GIT_SHALLOW     TRUE
 )
 
-FetchContent_MakeAvailable(embr)
+#FetchContent_MakeAvailable(embr)
+FetchContent_MakeAvailable(estd)
 
 include(sources.cmake)
 
@@ -47,7 +50,7 @@ target_include_directories(${PROJECT_NAME} ${LINKAGE_MODE} include)
 
 include(${TOOLS_DIR}/cmake/version.cmake)
 
-target_link_libraries(${PROJECT_NAME} ${LINKAGE_MODE} embr estd)
+target_link_libraries(${PROJECT_NAME} ${LINKAGE_MODE} estd)
 
 # Makes no difference for estd "that is not in any export set." error
 #target_link_libraries(${PROJECT_NAME} PUBLIC idf::newlib)

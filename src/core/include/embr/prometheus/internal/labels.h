@@ -20,12 +20,12 @@ struct Labels
 
     Labels(const Labels&) = default;
 
-    constexpr Labels(const char** n, const estd::tuple<Args...>& v) :
+    constexpr Labels(const char* n[], const estd::tuple<Args...>& v) :
         names{n},
         values{v}
     {}
 
-    explicit constexpr Labels(const char** n, Args&&... v) :
+    explicit constexpr Labels(const char* n[], Args&&... v) :
         names{n},
         values(std::forward<Args>(v)...)
     {}

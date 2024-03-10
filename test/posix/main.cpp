@@ -1,3 +1,4 @@
+#include <chrono>
 #include <iostream>
 
 #include <estd/internal/streambuf.h>
@@ -5,7 +6,6 @@
 
 #include <embr/prometheus.h>
 #include <embr/prometheus/internal/server.h>
-#include <embr/internal/histogram.h>
 #include <embr/posix/socket.h>
 #include <embr/posix/streambuf.h>
 
@@ -39,7 +39,11 @@ int main()
 
     server.start(9100);
 
+    using time_point = std::chrono::system_clock::time_point;
+    time_point last_request = time_point::max();
+
     embr::prometheus::Counter<unsigned> request_count;
+    embr::prometheus::Histogram<unsigned, unsigned, 0, 5, 30, 60> request_interval;
 
     for(;;)
     {
@@ -53,15 +57,28 @@ int main()
             continue;
         }
 
-        request_count.inc();
+        const time_point now = std::chrono::system_clock::now();
+
+        if(last_request != time_point::max())
+        {
+            auto interval = std::chrono::duration_cast<std::chrono::seconds>(now - last_request);
+
+            request_interval.observe(interval.count());
+        }
+
+        last_request = now;
 
         posix_ostream client_out(client_fd);
 
-        embr::prometheus::OutAssist2<posix_ostream> oa(client_out, "request");
-
         http_respond_ok(client_out);
 
-        oa.metric(request_count);
+        const char* names[] { "instance", "tst" };
+
+        client_out << put_metric(++request_count, "request");
+        client_out << put_metric(request_interval, "request_interval",
+            "How much time passed between incoming request",
+            embr::prometheus::Labels(names, 0, 1));
+
         client_fd.shutdown(SHUT_RDWR);
         client_fd.close();
     }
