@@ -14,7 +14,7 @@ extern const char** label_names;
 template <class ...Args>
 struct Labels
 {
-    const char** names;
+    const char* const* names;
     estd::tuple<Args...> values;
     //std::tuple<Args...> values;
 
@@ -29,6 +29,15 @@ struct Labels
         names{n},
         values(std::forward<Args>(v)...)
     {}
+
+    constexpr Labels(
+        const std::initializer_list<const char*>& n,
+        Args&&...v) :
+        names{data(n)},
+        values{std::forward<Args>(v)...}
+    {
+        assert(n.size() >= sizeof...(Args));
+    }
 };
 
 //template <class ...Args> Labels(const char**, Args&&...args) ->

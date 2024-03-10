@@ -172,11 +172,20 @@ constexpr internal::metric_put_core<Gauge<T> >
 
 template <class T, class ...Args>
 constexpr internal::metric_put_core<Gauge<T>, Args...>
-    put_metric_gauge(const T& value, const char* name, const char* help,
-        const char** label_names,
+put_metric_gauge(const T& value, const char* name, const char* help,
+        const std::initializer_list<const char*>& label_names,
         Args&&...args)
 {
     return { { value }, name, help, Labels{ label_names, std::forward<Args>(args)...} };
+}
+
+template <class T, class ...Args>
+constexpr internal::metric_put_core<Gauge<T>, Args...>
+put_metric_gauge(const T& value, const char* name, const char* help,
+    const char* label_names[],
+    Args&&...label_values)
+{
+    return { { value }, name, help, Labels{ label_names, std::forward<Args>(label_values)...} };
 }
 
 template <class Metric, class ...LabelValues>
@@ -187,16 +196,14 @@ put_metric(const Metric& metric, const char* name, const char* help,
     return { metric, name, help, labels };
 }
 
-// DEBT: THis one collides with above Label one, so temporarily disabling
-/*
 template <class Metric, class ...LabelValues>
 constexpr internal::metric_put<Metric, LabelValues...>
 put_metric(const Metric& metric, const char* name, const char* help,
+    const std::initializer_list<const char*>& label_names,
     LabelValues&&... label_values)
 {
-    return { metric, name, help, Labels<LabelValues...>(label_names,
-        estd::tuple<LabelValues...>(std::forward<LabelValues>(label_values)...)) };
+    return { metric, name, help, Labels(label_names,
+        std::forward<LabelValues>(label_values)...) };
 }
-*/
 
 }}

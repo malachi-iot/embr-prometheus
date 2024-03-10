@@ -130,5 +130,7 @@ TEST_CASE("ostream")
         write(out, labels);
 
         REQUIRE(str == "val1=\"0\", val2=\"Hello\"");
+
+        Labels labels2( { "hi", "friend" }, 0);
     }
 }

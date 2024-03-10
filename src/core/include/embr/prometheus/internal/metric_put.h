@@ -4,6 +4,9 @@
 
 namespace embr::prometheus::internal {
 
+// TODO: Put help_ in context and make it a 1st class citizen instead of
+// tucked away as a helper in internal
+
 // Remember usually Metric is a const ref but once in a while it's an inline class
 template <class ...Args>
 struct ContextBase

@@ -72,12 +72,10 @@ int main()
 
         http_respond_ok(client_out);
 
-        const char* names[] { "instance", "tst" };
-
         client_out << put_metric(++request_count, "request");
         client_out << put_metric(request_interval, "request_interval",
             "How much time passed between incoming request",
-            embr::prometheus::Labels(names, 0, 1));
+            {"instance", "str"}, 0, (const char*)"hello2u");
 
         client_fd.shutdown(SHUT_RDWR);
         client_fd.close();
