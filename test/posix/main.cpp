@@ -70,15 +70,21 @@ int main()
 
         posix_ostream client_out(client_fd);
 
+        embr::prometheus::posix_istream client_in(client_fd);
+
+        //static char buf[1024];
+
+        //client_in.read(buf, sizeof(buf));
+
         http_respond_ok(client_out);
 
-        client_out << put_metric(++request_count, "request");
+        client_out << put_metric(++request_count, "request", "help");
         client_out << put_metric(request_interval, "request_interval",
             "How much time passed between incoming request",
-            {"instance", "str"}, 0, (const char*)"hello2u");
+            {"inst", "str"}, 0, (const char*)"hello2u");
 
         client_fd.shutdown(SHUT_RDWR);
-        client_fd.close();
+        //client_fd.close();
     }
 
     return 0;
