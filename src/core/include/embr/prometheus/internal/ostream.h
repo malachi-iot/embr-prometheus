@@ -2,8 +2,9 @@
 
 #include <estd/ostream.h>
 
+// Not CRLF as per [1]
 // DEBT: Pick better name, constexpr if we can
-#define HTTP_ENDL   "\r\n"
+#define HTTP_ENDL   "\n"
 
 namespace embr::prometheus::internal {
 

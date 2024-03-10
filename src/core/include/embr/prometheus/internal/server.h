@@ -67,11 +67,12 @@ public:
 };
 
 
+// As per [1]
 template <class Streambuf, class Base>
 void http_respond_ok(estd::detail::basic_ostream<Streambuf, Base>& out)
 {
     out << "HTTP/1.1 200 OK" << HTTP_ENDL;
-    out << "Content-Type: text/plain" << HTTP_ENDL;
+    out << "Content-Type: text/plain; version=0.0.4" << HTTP_ENDL;
     out << "Connection: close" << HTTP_ENDL;
     out << HTTP_ENDL;
 }

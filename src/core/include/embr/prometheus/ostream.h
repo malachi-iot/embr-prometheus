@@ -128,8 +128,8 @@ public:
         oa_.out_ << HTTP_ENDL;
         oa_.reset();
 
-        // DEBT: With presence of +Inf, isn't this superfluous?  Perhaps I'm not
-        // doing this right
+        // "A histogram MUST have a bucket with {le="+Inf"}.
+        // Its value must be identical to the value of x_count." [1]
         oa_.name_and_labels(*context_, "_count");
         oa_.metric(Gauge(calced[i]));
         oa_.out_ << HTTP_ENDL;

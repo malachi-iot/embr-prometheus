@@ -52,5 +52,16 @@ Labels<Args...> make_labels(const char** n, Args&&...args)
     return Labels<Args...>(n, std::forward<Args>(args)...);
 }
 
+template <class ...Args>
+struct Labels3
+{
+    //estd::tuple<Args...> name_and_value_pairs;
+
+    //Labels3(const std::initializer_list<estd::pair<const char*, auto> >& list)
+    //{
+
+    //}
+};
+
 
 }
