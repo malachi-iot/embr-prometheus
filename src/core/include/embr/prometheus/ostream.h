@@ -51,10 +51,10 @@ void write(estd::detail::basic_ostream<Streambuf, Base>& out,
 template <class Stream, typename ...LabelValueTypes>
 class OutAssist2
 {
+    internal::OutAssist<Stream> oa_;
+
     using context_type = internal::ContextBase<LabelValueTypes...>;
     const context_type* context_;
-
-    internal::OutAssist<Stream> oa_;
 
     using labels_type = Labels<LabelValueTypes...>;
 

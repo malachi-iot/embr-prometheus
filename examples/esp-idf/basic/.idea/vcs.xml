@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="VcsDirectoryMappings">
+    <mapping directory="$PROJECT_DIR$/../../../../../ext/esp-idf-5.1" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../../../../../ext/esp-idf-5.1/components/bootloader/subproject/components/micro-ecc/micro-ecc" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../../../../../ext/esp-idf-5.1/components/bt/controller/lib_esp32" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../../../../../ext/esp-idf-5.1/components/bt/controller/lib_esp32c2/esp32c2-bt-lib" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../../../../../ext/esp-idf-5.1/components/bt/controller/lib_esp32c3_family" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../../../../../ext/esp-idf-5.1/components/bt/controller/lib_esp32c6/esp32c6-bt-lib" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../../../../../ext/esp-idf-5.1/components/bt/controller/lib_esp32h2/esp32h2-bt-lib" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../../../../../ext/esp-idf-5.1/components/bt/host/nimble/nimble" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../../../../../ext/esp-idf-5.1/components/cmock/CMock" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../../../../../ext/esp-idf-5.1/components/esp_coex/lib" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../../../../../ext/esp-idf-5.1/components/esp_phy/lib" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../../../../../ext/esp-idf-5.1/components/esp_wifi/lib" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../../../../../ext/esp-idf-5.1/components/heap/tlsf" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../../../../../ext/esp-idf-5.1/components/json/cJSON" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../../../../../ext/esp-idf-5.1/components/lwip/lwip" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../../../../../ext/esp-idf-5.1/components/mbedtls/mbedtls" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../../../../../ext/esp-idf-5.1/components/mqtt/esp-mqtt" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../../../../../ext/esp-idf-5.1/components/openthread/lib" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../../../../../ext/esp-idf-5.1/components/openthread/openthread" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../../../../../ext/esp-idf-5.1/components/protobuf-c/protobuf-c" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../../../../../ext/esp-idf-5.1/components/spiffs/spiffs" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../../../../../ext/esp-idf-5.1/components/unity/unity" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../../.." vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../../../src/esp-idf/embr-prometheus/test_apps/unity/build/_deps/embr-src" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../../../src/esp-idf/embr-prometheus/test_apps/unity/build/_deps/embr-src/ext/estdlib" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../../../src/esp-idf/embr-prometheus/test_apps/unity/build/_deps/embr-src/ext/estdlib/test/arduino/ostream/lib/estdlib" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../../../src/esp-idf/embr-prometheus/test_apps/unity/build/_deps/embr-src/test/arduino/scheduler/lib/estdlib" vcs="Git" />
+  </component>
+</project>

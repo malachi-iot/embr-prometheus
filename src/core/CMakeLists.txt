@@ -24,6 +24,8 @@ FetchContent_Declare(
 #FetchContent_MakeAvailable(embr)
 FetchContent_MakeAvailable(estd)
 
+include(${TOOLS_DIR}/cmake/fetch.cmake)
+
 include(sources.cmake)
 
 # DEBT: Making this INTERFACE as we work out linker issues (it didn't help, though)
@@ -47,6 +49,7 @@ target_sources(${PROJECT_NAME} ${LINKAGE_MODE}
 add_library(embr::prometheus::core ALIAS ${PROJECT_NAME})
 
 target_include_directories(${PROJECT_NAME} ${LINKAGE_MODE} include)
+target_include_directories(${PROJECT_NAME} ${LINKAGE_MODE} ${quantiles_SOURCE_DIR})
 
 include(${TOOLS_DIR}/cmake/version.cmake)
 
