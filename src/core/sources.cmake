@@ -7,5 +7,6 @@ set(INCLUDES
     )
 
 set(EXTRAS
+    doc/References.md
     idf_component.yml
     README.md)

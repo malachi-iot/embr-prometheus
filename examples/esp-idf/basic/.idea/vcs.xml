@@ -24,6 +24,10 @@
     <mapping directory="$PROJECT_DIR$/../../../../../ext/esp-idf-5.1/components/spiffs/spiffs" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/../../../../../ext/esp-idf-5.1/components/unity/unity" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/../../.." vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/build/_deps/quantiles-src" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/build/_deps/quantiles-src/thirdparty/Catch2" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/build/_deps/quantiles-src/thirdparty/blade-build" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/build/_deps/quantiles-src/thirdparty/cpplint" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/../../../src/esp-idf/embr-prometheus/test_apps/unity/build/_deps/embr-src" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/../../../src/esp-idf/embr-prometheus/test_apps/unity/build/_deps/embr-src/ext/estdlib" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/../../../src/esp-idf/embr-prometheus/test_apps/unity/build/_deps/embr-src/ext/estdlib/test/arduino/ostream/lib/estdlib" vcs="Git" />

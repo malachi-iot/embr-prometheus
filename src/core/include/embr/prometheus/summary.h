@@ -6,7 +6,7 @@
 
 #include "fwd.h"
 
-namespace embr::prometheus {
+namespace embr::prometheus { inline namespace v1 {
 
 // https://grafana.com/blog/2022/03/01/how-summary-metrics-work-in-prometheus/
 
@@ -24,4 +24,4 @@ public:
     }
 };
 
-}
+}}

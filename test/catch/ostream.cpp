@@ -51,7 +51,7 @@ TEST_CASE("ostream")
         h.observe(25);
         h.observe(35);
 
-        g.add(23);
+        g.inc(23);
 
         oa.name("metric1");
         oa.label("instance", "1");

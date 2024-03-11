@@ -1,9 +1,8 @@
 #pragma once
 
 #include "../prometheus/fwd.h"
-//#include "../cbor/cbor.h"
 
-namespace embr { namespace prometheus {
+namespace embr::prometheus { inline namespace v1 {
 
 // buckets MUST appear in ascending order
 // TODO: Make specialized version without sum

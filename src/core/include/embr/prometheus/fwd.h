@@ -4,6 +4,8 @@
 
 namespace embr { namespace prometheus {
 
+inline namespace v1 {
+
 struct metric_tag {};
 
 template <typename Counter, typename Bucket, Bucket... buckets>
@@ -14,6 +16,8 @@ class Counter;
 
 template <class T>
 class Gauge;
+
+}
 
 namespace internal {
 

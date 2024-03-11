@@ -1,25 +1,48 @@
+#pragma once
+
 #include "fwd.h"
 
-namespace embr { namespace prometheus {
+namespace embr::prometheus { inline namespace v1 {
+
+inline namespace internal {
 
 template <class T>
-class Counter : metric_tag
+class CounterBase : metric_tag
 {
+protected:
     T value_;
 
 public:
-    constexpr Counter(T initial = {}) : value_{initial} {}
+    constexpr CounterBase(T initial) : value_{initial} {}
 
     void inc()
     {
         ++value_;
     }
 
+    // [1.1] demands this, so we'll do it
+    void inc(const T& v)
+    {
+        value_ += v;
+    }
+
     constexpr const T& value() const { return value_; }
+
+};
+
+}
+
+template <class T>
+class Counter : internal::CounterBase<T>
+{
+    using base_type = internal::CounterBase<T>;
+
+public:
+    constexpr explicit Counter(T initial = {}) : base_type{initial} {}
 
     Counter& operator++()
     {
-        ++value_;
+        ++base_type::value_;
         return *this;
     }
 };

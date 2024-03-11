@@ -1,25 +1,40 @@
 #pragma once
 
-namespace embr::prometheus {
+#include <ctime>
+
+#include "counter.h"
+
+namespace embr::prometheus { inline namespace v1 {
 
 template <class T>
-class Gauge : metric_tag
+class Gauge : public internal::CounterBase<T>
 {
-    T value_;
+    using base_type = internal::CounterBase<T>;
 
 public:
-    constexpr Gauge(const T& initial = {}) : value_{initial} {}
+    constexpr explicit Gauge(const T& initial = {}) : base_type{initial} {}
 
-    void add(T value)
+    void dec(const T& v = 1)
     {
-        value_ += value;
+        base_type::value_ -= v;
     }
 
-    constexpr const T& value() const { return value_; }
+    void set(const T& v)
+    {
+        base_type::value_ = v;
+    }
+
+    // As per [1.1], untested
+    void set_to_current_time()
+    {
+        std::time_t seconds = std::time(nullptr);
+
+        set(seconds);
+    }
 
     Gauge& operator+=(const T& rhs)
     {
-        value_ += rhs;
+        base_type::value_ += rhs;
         return *this;
     }
 };
