@@ -8,5 +8,14 @@ FetchContent_Declare(
         GIT_SHALLOW     TRUE
 )
 
+# EXPERIMENTAL, dormant while we evaluate 'quantiles'
+FetchContent_Declare(
+        percentiles
+        GIT_REPOSITORY  https://github.com/sengelha/streaming-percentiles
+        GIT_TAG         v3.1.0
+        GIT_SHALLOW     TRUE
+)
+
+
 FetchContent_GetProperties(quantiles)
 FetchContent_Populate(quantiles)

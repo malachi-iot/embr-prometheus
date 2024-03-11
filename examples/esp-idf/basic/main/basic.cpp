@@ -6,6 +6,7 @@
 #include <embr/prometheus/internal/server.h>
 
 void wifi_init_sta();
+void initialize_mdns();
 
 using namespace embr::prometheus;
 
@@ -26,6 +27,7 @@ extern "C" void app_main(void)
     // NOTE: Prometheus scrapes imply a fixed IP address.  You might consider
     // a DHCP reservation for your ESP32.
     wifi_init_sta();
+    initialize_mdns();
 
     MiniHttpServer server;
 
