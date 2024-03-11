@@ -44,3 +44,11 @@ TEST_CASE("cbor")
 
     xh.decode_from_streambuf(*rdbuf);
 }
+
+
+TEST_CASE("experimental")
+{
+    tester t{std::pair{"hi", 3}};
+    tester t2{std::pair{"2u", "x"}};
+    //tester t3{std::pair{"hi", 3}, std::pair{"2u", "x"}};
+}
