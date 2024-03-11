@@ -4,7 +4,7 @@
 
 namespace embr::prometheus { inline namespace v1 {
 
-inline namespace internal {
+namespace internal {
 
 template <class T>
 class CounterBase : metric_tag
@@ -33,7 +33,7 @@ public:
 }
 
 template <class T>
-class Counter : internal::CounterBase<T>
+class Counter : public internal::CounterBase<T>
 {
     using base_type = internal::CounterBase<T>;
 

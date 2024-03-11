@@ -4,9 +4,10 @@
 
 // Not CRLF as per [1]
 // DEBT: Pick better name, constexpr if we can
+// DEBT: Would be nice if we could do this through a locale somehow
 #define HTTP_ENDL   "\n"
 
-namespace embr::prometheus::internal {
+namespace embr::prometheus { inline namespace v1 { namespace internal {
 
 // Guidance from
 // https://sysdig.com/blog/prometheus-metrics/
@@ -169,10 +170,16 @@ public:
         out_ << ' ' << value;
     }
 
+    template <class T, typename Counter>
+    void metric(const Summary<T, Counter>& value)
+    {
+    }
+
+
     void reset()
     {
         labels_ = 0;
     }
 };
 
-}
+}}}

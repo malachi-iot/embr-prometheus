@@ -2,10 +2,6 @@
 
 #include <estd/string.h>
 
-#include <estd/ios.h>
-// DEBT: Do a fwd for this guy
-#include <estd/iomanip.h>
-
 #include "internal/metric_put.h"
 #include "internal/ostream.h"
 
@@ -185,7 +181,7 @@ put_metric_gauge(const T& value, const char* name, const char* help,
     const char* label_names[],
     Args&&...label_values)
 {
-    return { { value }, name, help, Labels{ label_names, std::forward<Args>(label_values)...} };
+    return { Gauge{ value }, name, help, Labels{ label_names, std::forward<Args>(label_values)...} };
 }
 
 template <class Metric, class ...LabelValues>

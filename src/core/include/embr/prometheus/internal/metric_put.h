@@ -2,7 +2,7 @@
 
 #include "labels.h"
 
-namespace embr::prometheus::internal {
+namespace embr::prometheus { inline namespace v1 { namespace internal {
 
 // TODO: Put help_ in context and make it a 1st class citizen instead of
 // tucked away as a helper in internal
@@ -82,4 +82,4 @@ struct metric_put_core : estd::internal::ostream_functor_tag
 };
 
 
-}
+}}}

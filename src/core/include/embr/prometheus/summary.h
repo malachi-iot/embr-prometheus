@@ -10,6 +10,7 @@ namespace embr::prometheus { inline namespace v1 {
 
 // https://grafana.com/blog/2022/03/01/how-summary-metrics-work-in-prometheus/
 
+// DEBT: Inconsistent template type arrangement (reversed from Histogram)
 template <class T, class Counter = unsigned>
 class Summary : metric_tag
 {

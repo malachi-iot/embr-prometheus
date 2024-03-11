@@ -17,7 +17,8 @@ class Counter;
 template <class T>
 class Gauge;
 
-}
+template <class T, typename Counter>
+class Summary;
 
 namespace internal {
 
@@ -28,6 +29,8 @@ struct metric_put_core;
 template <class Metric, class ...Args>
 //using metric_put = metric_put_core<estd::add_lvalue_reference_t<Metric>, Args...>;
 using metric_put = metric_put_core<const Metric&, Args...>;
+
+}
 
 }
 
